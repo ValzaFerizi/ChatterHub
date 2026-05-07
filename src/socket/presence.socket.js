@@ -1,38 +1,44 @@
 const presenceService = require('../services/presence.service');
 
 const presenceSocket = (io, socket) => {
-  // Kur përdoruesi bashkohet në një room
-  socket.on('user:join', (userData) => {
-    presenceService.addUser(socket.id, userData);
-    
-    // Bashkohu në room
-    socket.join(userData.room);
-    
-    // Njofto të gjithë në room
-    io.to(userData.room).emit('user:joined', {
-      user: userData,
-      activeUsers: presenceService.getActiveUsers()
+  socket.on('form:join', (data) => {
+    presenceService.addUser(socket.id, {
+      username: socket.userData.username,
+      formId: data.formId
     });
 
-    console.log(`${userData.username} u bashkua në ${userData.room}`);
-  });
-
-  // Kur përdoruesi lëviz kursorin
-  socket.on('cursor:move', (data) => {
-    socket.to(data.room).emit('cursor:updated', {
-      userId: socket.id,
-      position: data.position
+    io.to(`form:${data.formId}`).emit('presence:form_users', {
+      users: presenceService.getUsersByForm(data.formId)
     });
   });
-//Kur perdoruesi shkeputet
+
+  socket.on('sheet:join', (data) => {
+    presenceService.addUser(socket.id, {
+      username: socket.userData.username,
+      sheetId: data.sheetId
+    });
+
+    io.to(`sheet:${data.sheetId}`).emit('presence:sheet_users', {
+      users: presenceService.getUsersBySheet(data.sheetId)
+    });
+  });
+
   socket.on('disconnect', () => {
     const user = presenceService.getUser(socket.id);
     if (user) {
       presenceService.removeUser(socket.id);
-      io.to(user.room).emit('user:left', {
-        user: user,
-        activeUsers: presenceService.getActiveUsers()
-      });
+
+      if (user.formId) {
+        io.to(`form:${user.formId}`).emit('presence:form_users', {
+          users: presenceService.getUsersByForm(user.formId)
+        });
+      }
+
+      if (user.sheetId) {
+        io.to(`sheet:${user.sheetId}`).emit('presence:sheet_users', {
+          users: presenceService.getUsersBySheet(user.sheetId)
+        });
+      }
     }
   });
 };

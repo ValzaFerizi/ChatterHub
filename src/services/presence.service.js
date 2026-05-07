@@ -12,8 +12,16 @@ const presenceService = {
     activeUsers.delete(socketId);
   },
 
-  getActiveUsers: () => {
-    return Array.from(activeUsers.values());
+  getUsersByForm: (formId) => {
+    return Array.from(activeUsers.values()).filter(
+      (user) => user.formId === formId
+    );
+  },
+
+  getUsersBySheet: (sheetId) => {
+    return Array.from(activeUsers.values()).filter(
+      (user) => user.sheetId === sheetId
+    );
   },
 
   getUser: (socketId) => {
