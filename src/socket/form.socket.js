@@ -1,36 +1,46 @@
+const formService = require('../services/form.service');
+
 const formSocket = (io, socket) => {
   socket.on('form:join', (data) => {
     socket.join(`form:${data.formId}`);
+    formService.createForm(data.formId);
+
+    // Dërgo të dhënat e form-it tek përdoruesi i ri
+    const form = formService.getForm(data.formId);
+    socket.emit('form:data', { form });
 
     io.to(`form:${data.formId}`).emit('form:user_joined', {
       userId: socket.id,
       username: socket.userData.username,
       formId: data.formId
     });
-
-    console.log(`${socket.userData.username} hapi form-in: ${data.formId}`);
   });
 
   socket.on('field:update', (data) => {
-    socket.to(`form:${data.formId}`).emit('field:updated', {
-      fieldId: data.fieldId,
-      value: data.value,
-      updatedBy: socket.userData.username,
-      updatedAt: new Date()
-    });
+    const updatedField = formService.updateField(
+      data.formId,
+      data.fieldId,
+      data.value,
+      socket.userData.username
+    );
 
-    console.log(`Field ${data.fieldId} u plotësua nga ${socket.userData.username}`);
+    io.to(`form:${data.formId}`).emit('field:updated', {
+      fieldId: data.fieldId,
+      ...updatedField
+    });
   });
 
   socket.on('form:submit', (data) => {
-    io.to(`form:${data.formId}`).emit('form:submitted', {
-      formId: data.formId,
-      submittedBy: socket.userData.username,
-      answers: data.answers,
-      submittedAt: new Date()
-    });
+    const response = formService.addResponse(
+      data.formId,
+      data.answers,
+      socket.userData.username
+    );
 
-    console.log(`Form ${data.formId} u dërgua nga ${socket.userData.username}`);
+    io.to(`form:${data.formId}`).emit('form:submitted', {
+      response,
+      totalResponses: formService.getResponseCount(data.formId)
+    });
   });
 
   socket.on('field:typing', (data) => {
