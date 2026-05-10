@@ -3,11 +3,15 @@ const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
 
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('ChatterHub API is running!');
