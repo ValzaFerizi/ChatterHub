@@ -37,4 +37,18 @@ const login = async (email, password) => {
   return { accessToken, refreshToken };
 };
 
-module.exports = { register, login };
+const refreshAccessToken = (refreshToken) => {
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const accessToken = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    return { accessToken };
+  } catch (error) {
+    throw new Error('Invalid refresh token');
+  }
+};
+
+module.exports = { register, login, refreshAccessToken };
