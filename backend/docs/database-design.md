@@ -1,5 +1,6 @@
 # Member 2: Database & API Design
-Member 2: Databaza dhe API
+Member 2: Databaza dhe APIg
+
 Qëllimi i Projektit
 
 Ky projekt është një form builder i ngjashëm me Google Forms, i ndërtuar duke përdorur një stack të stilit MERN.
