@@ -3,7 +3,8 @@ const { register, login, refreshAccessToken } = require('../services/authService
 const registerUser = async (req, res) => {
   try {
     const { first_name, last_name, email, password } = req.body;
-    const result = await register(first_name, last_name, email, password);
+    const ipAddress = req.ip;
+    const result = await register(first_name, last_name, email, password, ipAddress);
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -13,7 +14,8 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const result = await login(email, password);
+    const ipAddress = req.ip;
+    const result = await login(email, password, ipAddress);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });

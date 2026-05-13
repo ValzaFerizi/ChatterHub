@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { findUserByEmail, createUser } = require('../repositories/authRepository');
+const { logAction } = require('./auditService');
 
 const register = async (first_name, last_name, email, password) => {
   const existingUser = findUserByEmail(email);
@@ -13,6 +14,7 @@ const register = async (first_name, last_name, email, password) => {
   createUser(user);
 
   return { message: 'User registered successfully' };
+  ogAction(user.id, 'REGISTER', 'User', user.id, null, email, ipAddress);
 };
 
 const login = async (email, password) => {
@@ -34,7 +36,9 @@ const login = async (email, password) => {
     { expiresIn: '7d' }
   );
 
+  
   return { accessToken, refreshToken };
+  logAction(user.id, 'LOGIN', 'User', user.id, null, email, ipAddress);
 };
 
 const refreshAccessToken = (refreshToken) => {
