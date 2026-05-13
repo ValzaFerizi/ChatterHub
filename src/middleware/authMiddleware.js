@@ -17,4 +17,12 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken };
+const validateAuditLog = (req, res, next) => {
+  const { action, entity } = req.body;
+  if (!action || !entity) {
+    return res.status(400).json({ message: 'Action and entity are required' });
+  }
+  next();
+};
+
+module.exports = { verifyToken, validateAuditLog };
