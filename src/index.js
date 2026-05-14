@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const permissionRoutes = require('./routes/permissionRoutes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/permissions', permissionRoutes);
 
 app.get('/', (req, res) => {
   res.send('ChatterHub API is running!');
