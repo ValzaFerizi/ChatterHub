@@ -1,3 +1,4 @@
+const { blacklistToken } = require('./tokenService');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { findUserByEmail, createUser } = require('../repositories/authRepository');
@@ -13,8 +14,9 @@ const register = async (first_name, last_name, email, password) => {
   const user = { id: Date.now(), first_name, last_name, email, password_hash };
   createUser(user);
 
+    ogAction(user.id, 'REGISTER', 'User', user.id, null, email, ipAddress)
   return { message: 'User registered successfully' };
-  ogAction(user.id, 'REGISTER', 'User', user.id, null, email, ipAddress);
+;
 };
 
 const login = async (email, password) => {
@@ -36,9 +38,9 @@ const login = async (email, password) => {
     { expiresIn: '7d' }
   );
 
-  
+  logAction(user.id, 'LOGIN', 'User', user.id, null, email, ipAddress);  
   return { accessToken, refreshToken };
-  logAction(user.id, 'LOGIN', 'User', user.id, null, email, ipAddress);
+  
 };
 
 const refreshAccessToken = (refreshToken) => {
@@ -55,4 +57,9 @@ const refreshAccessToken = (refreshToken) => {
   }
 };
 
-module.exports = { register, login, refreshAccessToken };
+const logout = async (token) => {
+  await blacklistToken(token, 15 * 60);
+  return { message: 'Logged out successfully' };
+};
+
+module.exports = { register, login, refreshAccessToken, logout };

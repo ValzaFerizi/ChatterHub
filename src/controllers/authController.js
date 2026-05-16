@@ -1,4 +1,4 @@
-const { register, login, refreshAccessToken } = require('../services/authService');
+const { register, login, refreshAccessToken, logout } = require('../services/authService');
 
 const registerUser = async (req, res) => {
   try {
@@ -32,4 +32,15 @@ const refreshToken = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, refreshToken };
+const logoutUser = async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const result = await logout(token);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser };
