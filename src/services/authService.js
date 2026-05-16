@@ -1,4 +1,4 @@
-const { blacklistToken } = require('./tokenService');
+const { blacklistToken, setSession, deleteSession } = require('./tokenService');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { findUserByEmail, createUser } = require('../repositories/authRepository');
@@ -38,7 +38,8 @@ const login = async (email, password) => {
     { expiresIn: '7d' }
   );
 
-  logAction(user.id, 'LOGIN', 'User', user.id, null, email, ipAddress);  
+  logAction(user.id, 'LOGIN', 'User', user.id, null, email, ipAddress); 
+  await setSession(user.id, { email: user.email }, 7 * 24 * 60 * 60); 
   return { accessToken, refreshToken };
   
 };
@@ -57,8 +58,9 @@ const refreshAccessToken = (refreshToken) => {
   }
 };
 
-const logout = async (token) => {
+const logout = async (token, userId) => {
   await blacklistToken(token, 15 * 60);
+  await deleteSession(userId);
   return { message: 'Logged out successfully' };
 };
 

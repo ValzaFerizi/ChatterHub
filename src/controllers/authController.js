@@ -43,4 +43,16 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const userId = req.user.id;
+    const result = await logout(token, userId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = { registerUser, loginUser, refreshToken, logoutUser };

@@ -9,4 +9,17 @@ const isTokenBlacklisted = async (token) => {
   return result === 'true';
 };
 
-module.exports = { blacklistToken, isTokenBlacklisted };
+const setSession = async (userId, data, expiresIn) => {
+  await client.set(`session:${userId}`, JSON.stringify(data), { EX: expiresIn });
+};
+
+const getSession = async (userId) => {
+  const data = await client.get(`session:${userId}`);
+  return data ? JSON.parse(data) : null;
+};
+
+const deleteSession = async (userId) => {
+  await client.del(`session:${userId}`);
+};
+
+module.exports = { blacklistToken, isTokenBlacklisted, setSession, getSession, deleteSession };
