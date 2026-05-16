@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
+const { connectRedis } = require('./config/redisClient');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+connectRedis();
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
