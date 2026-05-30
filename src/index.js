@@ -8,6 +8,8 @@ const roleRoutes = require('./routes/roleRoutes');
 const auditRoutes = require('./routes/auditRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
 const { connectRedis } = require('./config/redisClient');
+const { errorHandler, notFound } = require('./middleware/errorMiddleware');
+
 
 const app = express();
 
@@ -23,6 +25,9 @@ app.use('/api/permissions', permissionRoutes);
 app.get('/', (req, res) => {
   res.send('ChatterHub API is running!');
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 connectRedis();
