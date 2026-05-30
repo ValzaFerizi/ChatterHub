@@ -21,3 +21,8 @@ Thumbs.db
 # Build
 dist/
 build/
+
+# Environment files
+.env.development
+.env.staging
+.env.production
