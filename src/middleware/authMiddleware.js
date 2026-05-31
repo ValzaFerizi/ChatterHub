@@ -25,4 +25,4 @@ const validateAuditLog = (req, res, next) => {
   next();
 };
 
-module.exports = { verifyToken, validateAuditLog, authLimiter};
+module.exports = { verifyToken, validateAuditLog };

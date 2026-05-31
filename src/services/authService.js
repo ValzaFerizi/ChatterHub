@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { findUserByEmail, createUser } = require('../repositories/authRepository');
 const { logAction } = require('./auditService');
 
-const register = async (first_name, last_name, email, password) => {
+const register = async (first_name, last_name, email, password, ipAddress) => {
   const existingUser = findUserByEmail(email);
   if (existingUser) {
     throw new Error('Email already exists');
@@ -14,12 +14,11 @@ const register = async (first_name, last_name, email, password) => {
   const user = { id: Date.now(), first_name, last_name, email, password_hash };
   createUser(user);
 
-    ogAction(user.id, 'REGISTER', 'User', user.id, null, email, ipAddress)
+  logAction(user.id, 'REGISTER', 'User', user.id, null, email, ipAddress);
   return { message: 'User registered successfully' };
-;
 };
 
-const login = async (email, password) => {
+const login = async (email, password, ipAddress) => {
   const user = findUserByEmail(email);
   if (!user) throw new Error('Invalid credentials');
 
