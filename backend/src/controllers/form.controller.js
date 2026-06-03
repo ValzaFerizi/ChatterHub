@@ -1,4 +1,3 @@
-@'
 const FormRepository = require('../repositories/form.repository');
 
 const FormController = {
@@ -92,4 +91,3 @@ const FormController = {
 };
 
 module.exports = FormController;
-'@ | Set-Content backend\src\controllers\form.controller.js

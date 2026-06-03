@@ -1,4 +1,3 @@
-@'
 const express = require('express');
 const FormController = require('../controllers/form.controller');
 
@@ -11,4 +10,3 @@ router.put('/:formId', FormController.updateForm);
 router.delete('/:formId', FormController.deleteForm);
 
 module.exports = router;
-'@ | Set-Content backend\src\routes\form.routes.js

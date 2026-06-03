@@ -1,4 +1,3 @@
-@'
 const express = require('express');
 const QuestionController = require('../controllers/question.controller');
 
@@ -11,4 +10,3 @@ router.delete('/questions/:questionId', QuestionController.deleteQuestion);
 router.patch('/forms/:formId/questions/reorder', QuestionController.reorderQuestions);
 
 module.exports = router;
-'@ | Set-Content backend\src\routes\question.routes.js

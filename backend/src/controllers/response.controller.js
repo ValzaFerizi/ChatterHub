@@ -1,4 +1,3 @@
-@'
 const ResponseRepository = require('../repositories/response.repository');
 
 const ResponseController = {
@@ -84,4 +83,3 @@ const ResponseController = {
 };
 
 module.exports = ResponseController;
-'@ | Set-Content backend\src\controllers\response.controller.js

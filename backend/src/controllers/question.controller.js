@@ -1,4 +1,3 @@
-@'
 const QuestionRepository = require('../repositories/question.repository');
 
 const QuestionController = {
@@ -90,4 +89,3 @@ const QuestionController = {
 };
 
 module.exports = QuestionController;
-'@ | Set-Content backend\src\controllers\question.controller.js

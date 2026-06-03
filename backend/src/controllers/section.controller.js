@@ -1,4 +1,3 @@
-@'
 const SectionRepository = require('../repositories/section.repository');
 
 const SectionController = {
@@ -71,4 +70,3 @@ const SectionController = {
 };
 
 module.exports = SectionController;
-'@ | Set-Content backend\src\controllers\section.controller.js

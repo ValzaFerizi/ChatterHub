@@ -1,4 +1,3 @@
-@'
 const express = require('express');
 const ResponseController = require('../controllers/response.controller');
 
@@ -10,4 +9,3 @@ router.get('/responses/:responseId', ResponseController.getResponseById);
 router.delete('/responses/:responseId', ResponseController.deleteResponse);
 
 module.exports = router;
-'@ | Set-Content backend\src\routes\response.routes.js

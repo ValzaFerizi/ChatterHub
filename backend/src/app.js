@@ -1,4 +1,3 @@
-@'
 const express = require('express');
 const cors = require('cors');
 
@@ -24,4 +23,3 @@ app.use('/api', questionRoutes);
 app.use('/api', responseRoutes);
 
 module.exports = app;
-'@ | Set-Content backend\src\app.js
