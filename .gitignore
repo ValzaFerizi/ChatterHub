@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Environment variables - SEKRETE, nuk shkon në GitHub!
+.env
+.env.local
+.env.production
+
+# Docker
+docker/volumes/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+
+# Environment files
+.env.development
+.env.staging
+.env.production
