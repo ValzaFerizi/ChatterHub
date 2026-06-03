@@ -37,3 +37,4 @@ Një formular mund të ketë shumë përgjigje.
 Një përgjigje mund të ketë shumë përgjigje të detajuara.
 Çdo përgjigje e detajuar i përket një përgjigjeje.
 Çdo përgjigje e detajuar i përket një pyetjeje.
+
