@@ -1,22 +1,70 @@
+const { Form, Section, Question, QuestionOption } = require('../models');
+
 const FormRepository = {
   async createForm(data) {
-    // TODO: create form in database
+    return Form.create(data);
   },
 
   async findFormsByOwner(ownerId) {
-    // TODO: find all forms for one user
+    return Form.findAll({
+      where: { ownerId },
+      order: [['createdAt', 'DESC']]
+    });
   },
 
   async findFormById(formId) {
-    // TODO: find one form by id
+    return Form.findByPk(formId, {
+      include: [
+        {
+          model: Section,
+          as: 'sections',
+          include: [
+            {
+              model: Question,
+              as: 'questions',
+              include: [
+                {
+                  model: QuestionOption,
+                  as: 'options'
+                }
+              ]
+            }
+          ]
+        },
+        {
+          model: Question,
+          as: 'questions',
+          include: [
+            {
+              model: QuestionOption,
+              as: 'options'
+            }
+          ]
+        }
+      ]
+    });
   },
 
   async updateForm(formId, data) {
-    // TODO: update form
+    const form = await Form.findByPk(formId);
+
+    if (!form) {
+      return null;
+    }
+
+    await form.update(data);
+    return form;
   },
 
   async deleteForm(formId) {
-    // TODO: delete form
+    const form = await Form.findByPk(formId);
+
+    if (!form) {
+      return null;
+    }
+
+    await form.destroy();
+    return true;
   }
 };
 

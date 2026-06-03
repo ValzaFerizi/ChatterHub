@@ -1,18 +1,61 @@
+const { Section, Question, QuestionOption } = require('../models');
+
 const SectionRepository = {
   async createSection(formId, data) {
-    // TODO: create section in database
+    return Section.create({
+      ...data,
+      formId
+    });
   },
 
   async findSectionsByForm(formId) {
-    // TODO: find sections by form id
+    return Section.findAll({
+      where: { formId },
+      include: [
+        {
+          model: Question,
+          as: 'questions',
+          include: [
+            {
+              model: QuestionOption,
+              as: 'options'
+            }
+          ]
+        }
+      ],
+      order: [
+        ['orderIndex', 'ASC'],
+        [{ model: Question, as: 'questions' }, 'orderIndex', 'ASC'],
+        [
+          { model: Question, as: 'questions' },
+          { model: QuestionOption, as: 'options' },
+          'orderIndex',
+          'ASC'
+        ]
+      ]
+    });
   },
 
   async updateSection(sectionId, data) {
-    // TODO: update section
+    const section = await Section.findByPk(sectionId);
+
+    if (!section) {
+      return null;
+    }
+
+    await section.update(data);
+    return section;
   },
 
   async deleteSection(sectionId) {
-    // TODO: delete section
+    const section = await Section.findByPk(sectionId);
+
+    if (!section) {
+      return null;
+    }
+
+    await section.destroy();
+    return true;
   }
 };
 
