@@ -1,14 +1,18 @@
-const { findRoleByName, assignRoleToUser, getUserRoles } = require('../repositories/roleRepository');
+const { findRoleByName, assignRoleToUser, getUserRoles, getAllRoles } = require('../repositories/roleRepository');
 
-const assignRole = (userId, roleName) => {
-  const role = findRoleByName(roleName);
+const assignRole = async (userId, roleName) => {
+  const role = await findRoleByName(roleName);
   if (!role) throw new Error('Role not found');
-  return assignRoleToUser(userId, role.id);
+  return await assignRoleToUser(userId, role.id);
 };
 
-const getUserPermissions = (userId) => {
-  const roles = getUserRoles(userId);
+const getUserRoleNames = async (userId) => {
+  const roles = await getUserRoles(userId);
   return roles.map(role => role.name);
 };
 
-module.exports = { assignRole, getUserPermissions };
+const listRoles = async () => {
+  return await getAllRoles();
+};
+
+module.exports = { assignRole, getUserRoleNames, listRoles };

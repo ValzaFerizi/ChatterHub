@@ -1,9 +1,9 @@
 const { getUserRoles } = require('../repositories/roleRepository');
 
 const requireRole = (...allowedRoles) => {
-  return (req, res, next) => {
+  return async (req, res, next) => {
     const userId = req.user.id;
-    const userRoles = getUserRoles(userId);
+    const userRoles = await getUserRoles(userId);
     const roleNames = userRoles.map(role => role.name);
 
     const hasRole = allowedRoles.some(role => roleNames.includes(role));

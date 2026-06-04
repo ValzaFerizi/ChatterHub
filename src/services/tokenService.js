@@ -1,25 +1,31 @@
-const { client } = require('../config/redisClient');
+const BlacklistedToken = require('../models/mongo/BlacklistedToken');
+const Session = require('../models/mongo/Session');
 
-const blacklistToken = async (token, expiresIn) => {
-  await client.set(`blacklist:${token}`, 'true', { EX: expiresIn });
+const blacklistToken = async (token, expiresInSeconds) => {
+  const expires_at = new Date(Date.now() + expiresInSeconds * 1000);
+  await BlacklistedToken.create({ token, expires_at });
 };
 
 const isTokenBlacklisted = async (token) => {
-  const result = await client.get(`blacklist:${token}`);
-  return result === 'true';
+  const found = await BlacklistedToken.findOne({ token });
+  return !!found;
 };
 
-const setSession = async (userId, data, expiresIn) => {
-  await client.set(`session:${userId}`, JSON.stringify(data), { EX: expiresIn });
+const setSession = async (userId, data, expiresInSeconds) => {
+  const expires_at = new Date(Date.now() + expiresInSeconds * 1000);
+  await Session.findOneAndUpdate(
+    { user_id: userId },
+    { user_id: userId, email: data.email, expires_at },
+    { upsert: true, new: true }
+  );
 };
 
 const getSession = async (userId) => {
-  const data = await client.get(`session:${userId}`);
-  return data ? JSON.parse(data) : null;
+  return await Session.findOne({ user_id: userId });
 };
 
 const deleteSession = async (userId) => {
-  await client.del(`session:${userId}`);
+  await Session.deleteOne({ user_id: userId });
 };
 
 module.exports = { blacklistToken, isTokenBlacklisted, setSession, getSession, deleteSession };

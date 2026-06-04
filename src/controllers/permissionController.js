@@ -2,7 +2,7 @@ const { getPermissions, assignPermission, getRolePermissions } = require('../ser
 
 const getAllPermissions = async (req, res) => {
   try {
-    const permissions = getPermissions();
+    const permissions = await getPermissions();
     res.status(200).json(permissions);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -12,7 +12,7 @@ const getAllPermissions = async (req, res) => {
 const assignPermissionToRole = async (req, res) => {
   try {
     const { roleId, permissionName } = req.body;
-    const result = assignPermission(roleId, permissionName);
+    const result = await assignPermission(roleId, permissionName);
     res.status(200).json({ message: 'Permission assigned successfully', result });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -22,7 +22,7 @@ const assignPermissionToRole = async (req, res) => {
 const getPermissionsForRole = async (req, res) => {
   try {
     const { roleId } = req.params;
-    const permissions = getRolePermissions(Number(roleId));
+    const permissions = await getRolePermissions(Number(roleId));
     res.status(200).json({ roleId, permissions });
   } catch (error) {
     res.status(400).json({ message: error.message });

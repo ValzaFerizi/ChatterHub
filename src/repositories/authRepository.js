@@ -1,12 +1,15 @@
-const users = [];
+const { User } = require('../models');
 
-const findUserByEmail = (email) => {
-  return users.find(user => user.email === email);
+const findUserByEmail = async (email) => {
+  return await User.findOne({ where: { email } });
 };
 
-const createUser = (user) => {
-  users.push(user);
-  return user;
+const findUserById = async (id) => {
+  return await User.findByPk(id);
 };
 
-module.exports = { findUserByEmail, createUser };
+const createUser = async (userData) => {
+  return await User.create(userData);
+};
+
+module.exports = { findUserByEmail, findUserById, createUser };

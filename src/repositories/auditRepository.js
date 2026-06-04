@@ -1,27 +1,23 @@
-const auditLogs = [];
+const AuditLog = require('../models/mongo/AuditLog');
 
-const createLog = (userId, action, entity, entityId, oldValue, newValue, ipAddress) => {
-  const log = {
-    id: Date.now(),
-    userId,
+const createLog = async (userId, action, entity, entityId, oldValue, newValue, ipAddress) => {
+  return await AuditLog.create({
+    user_id: userId,
     action,
     entity,
-    entityId,
-    oldValue,
-    newValue,
-    ipAddress,
-    created_at: new Date().toISOString()
-  };
-  auditLogs.push(log);
-  return log;
+    entity_id: entityId,
+    old_value: oldValue || null,
+    new_value: newValue || null,
+    ip_address: ipAddress
+  });
 };
 
-const getAllLogs = () => {
-  return auditLogs;
+const getAllLogs = async () => {
+  return await AuditLog.find().sort({ created_at: -1 });
 };
 
-const getLogsByUser = (userId) => {
-  return auditLogs.filter(log => log.userId === userId);
+const getLogsByUser = async (userId) => {
+  return await AuditLog.find({ user_id: userId }).sort({ created_at: -1 });
 };
 
 module.exports = { createLog, getAllLogs, getLogsByUser };

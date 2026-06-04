@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { isTokenBlacklisted } = require('../services/tokenService');
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -9,6 +10,11 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
+    const blacklisted = await isTokenBlacklisted(token);
+    if (blacklisted) {
+      return res.status(401).json({ message: 'Token has been revoked' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();

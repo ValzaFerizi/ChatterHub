@@ -1,33 +1,32 @@
-const permissions = [
-  { id: 1, name: 'create_user', description: 'Can create users' },
-  { id: 2, name: 'delete_user', description: 'Can delete users' },
-  { id: 3, name: 'view_logs', description: 'Can view audit logs' },
-  { id: 4, name: 'manage_roles', description: 'Can manage roles' },
-  { id: 5, name: 'view_users', description: 'Can view all users' }
-];
+const { Permission, RolePermission, Role } = require('../models');
 
-const rolePermissions = [];
-
-const getAllPermissions = () => permissions;
-
-const findPermissionByName = (name) => {
-  return permissions.find(p => p.name === name);
+const getAllPermissions = async () => {
+  return await Permission.findAll();
 };
 
-const assignPermissionToRole = (roleId, permissionId) => {
-  rolePermissions.push({ roleId, permissionId });
-  return { roleId, permissionId };
+const findPermissionByName = async (name) => {
+  return await Permission.findOne({ where: { name } });
 };
 
-const getPermissionsByRole = (roleId) => {
-  return rolePermissions
-    .filter(rp => rp.roleId === roleId)
-    .map(rp => permissions.find(p => p.id === rp.permissionId));
+const findPermissionById = async (id) => {
+  return await Permission.findByPk(id);
 };
 
-module.exports = { 
-  getAllPermissions, 
-  findPermissionByName, 
-  assignPermissionToRole, 
-  getPermissionsByRole 
+const assignPermissionToRole = async (roleId, permissionId) => {
+  return await RolePermission.create({ role_id: roleId, permission_id: permissionId });
+};
+
+const getPermissionsByRole = async (roleId) => {
+  const role = await Role.findByPk(roleId, {
+    include: [{ association: 'permissions' }]
+  });
+  return role ? role.permissions : [];
+};
+
+module.exports = {
+  getAllPermissions,
+  findPermissionByName,
+  findPermissionById,
+  assignPermissionToRole,
+  getPermissionsByRole
 };

@@ -6,6 +6,6 @@ const { requireRole } = require('../middleware/rbacMiddleware');
 
 router.get('/', verifyToken, requireRole('admin'), getAllPermissions);
 router.post('/assign', verifyToken, requireRole('admin'), assignPermissionToRole);
-router.get('/:roleId', verifyToken, requireRole('admin'), getPermissionsForRole);
+router.get('/role/:roleId', verifyToken, requireRole('admin'), getPermissionsForRole);
 
 module.exports = router;

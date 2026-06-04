@@ -2,7 +2,7 @@ const { logAction, getLogs, getUserLogs } = require('../services/auditService');
 
 const getAllLogs = async (req, res) => {
   try {
-    const logs = getLogs();
+    const logs = await getLogs();
     res.status(200).json(logs);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -12,7 +12,7 @@ const getAllLogs = async (req, res) => {
 const getLogsForUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const logs = getUserLogs(Number(userId));
+    const logs = await getUserLogs(Number(userId));
     res.status(200).json(logs);
   } catch (error) {
     res.status(400).json({ message: error.message });

@@ -5,18 +5,18 @@ const {
   getPermissionsByRole 
 } = require('../repositories/permissionRepository');
 
-const getPermissions = () => {
-  return getAllPermissions();
+const getPermissions = async () => {
+  return await getAllPermissions();
 };
 
-const assignPermission = (roleId, permissionName) => {
-  const permission = findPermissionByName(permissionName);
+const assignPermission = async (roleId, permissionName) => {
+  const permission = await findPermissionByName(permissionName);
   if (!permission) throw new Error('Permission not found');
-  return assignPermissionToRole(roleId, permission.id);
+  return await assignPermissionToRole(roleId, permission.id);
 };
 
-const getRolePermissions = (roleId) => {
-  return getPermissionsByRole(roleId);
+const getRolePermissions = async (roleId) => {
+  return await getPermissionsByRole(roleId);
 };
 
 module.exports = { getPermissions, assignPermission, getRolePermissions };

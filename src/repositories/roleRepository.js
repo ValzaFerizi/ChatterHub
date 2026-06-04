@@ -1,24 +1,26 @@
-const roles = [
-  { id: 1, name: 'admin', description: 'Administrator' },
-  { id: 2, name: 'user', description: 'Regular User' },
-  { id: 3, name: 'manager', description: 'Manager' }
-];
+const { Role, UserRole, User } = require('../models');
 
-const userRoles = [];
-
-const findRoleByName = (name) => {
-  return roles.find(role => role.name === name);
+const findRoleByName = async (name) => {
+  return await Role.findOne({ where: { name } });
 };
 
-const assignRoleToUser = (userId, roleId) => {
-  userRoles.push({ userId, roleId });
-  return { userId, roleId };
+const findRoleById = async (id) => {
+  return await Role.findByPk(id);
 };
 
-const getUserRoles = (userId) => {
-  return userRoles
-    .filter(ur => ur.userId === userId)
-    .map(ur => roles.find(r => r.id === ur.roleId));
+const getAllRoles = async () => {
+  return await Role.findAll();
 };
 
-module.exports = { findRoleByName, assignRoleToUser, getUserRoles };
+const assignRoleToUser = async (userId, roleId) => {
+  return await UserRole.create({ user_id: userId, role_id: roleId });
+};
+
+const getUserRoles = async (userId) => {
+  const user = await User.findByPk(userId, {
+    include: [{ association: 'roles' }]
+  });
+  return user ? user.roles : [];
+};
+
+module.exports = { findRoleByName, findRoleById, getAllRoles, assignRoleToUser, getUserRoles };
