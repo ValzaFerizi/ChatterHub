@@ -1,16 +1,15 @@
 const formService = require('../services/form.service');
 
 const formSocket = (io, socket) => {
-  socket.on('form:join', (data) => {
-    socket.join(`form:${data.formId}`);
-    formService.createForm(data.formId);
 
-    // Dërgo të dhënat e form-it tek përdoruesi i ri
-    const form = formService.getForm(data.formId);
+  socket.on('form:join', async (data) => {
+    socket.join(`form:${data.formId}`);
+
+    const form = formService.createForm(data.formId);
     socket.emit('form:data', { form });
 
     io.to(`form:${data.formId}`).emit('form:user_joined', {
-      userId: socket.id,
+      userId: socket.userData.id,
       username: socket.userData.username,
       formId: data.formId
     });
@@ -30,17 +29,24 @@ const formSocket = (io, socket) => {
     });
   });
 
-  socket.on('form:submit', (data) => {
-    const response = formService.addResponse(
-      data.formId,
-      data.answers,
-      socket.userData.username
-    );
+  socket.on('form:submit', async (data) => {
+    try {
+      const response = formService.addResponse(
+        data.formId,
+        data.answers,
+        socket.userData.id
+      );
 
-    io.to(`form:${data.formId}`).emit('form:submitted', {
-      response,
-      totalResponses: formService.getResponseCount(data.formId)
-    });
+      const totalResponses = formService.getResponseCount(data.formId);
+
+      io.to(`form:${data.formId}`).emit('form:submitted', {
+        response,
+        totalResponses
+      });
+
+    } catch (err) {
+      socket.emit('form:error', { message: 'Gabim gjate dergimit te formes.' });
+    }
   });
 
   socket.on('field:typing', (data) => {
