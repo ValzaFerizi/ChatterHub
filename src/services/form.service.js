@@ -1,7 +1,7 @@
 const forms = new Map();
 
 const formService = {
-  // Krijo form të ri
+
   createForm: (formId) => {
     if (!forms.has(formId)) {
       forms.set(formId, {
@@ -15,39 +15,28 @@ const formService = {
     return forms.get(formId);
   },
 
-  // Merr form-in
   getForm: (formId) => {
     return forms.get(formId) || null;
   },
 
-  // Përditëso një field
   updateField: (formId, fieldId, value, updatedBy) => {
     if (!forms.has(formId)) {
       formService.createForm(formId);
     }
-
     const form = forms.get(formId);
-    form.fields[fieldId] = {
-      value,
-      updatedBy,
-      updatedAt: new Date()
-    };
+    form.fields[fieldId] = { value, updatedBy, updatedAt: new Date() };
     form.updatedAt = new Date();
-
     return form.fields[fieldId];
   },
 
-  // Shto përgjigje të re
-  addResponse: (formId, answers, submittedBy) => {
-    if (!forms.has(formId)) {
-      formService.createForm(formId);
-    }
-
+  addResponse: (formId, answers, userId) => {
     const form = forms.get(formId);
+    if (!form) return null;
+
     const response = {
       id: Date.now(),
       answers,
-      submittedBy,
+      submittedBy: userId,
       submittedAt: new Date()
     };
 
@@ -55,18 +44,14 @@ const formService = {
     return response;
   },
 
-  // Merr të gjitha përgjigjet
-  getResponses: (formId) => {
-    const form = forms.get(formId);
-    if (!form) return [];
-    return form.responses;
-  },
-
-  // Merr numrin e përgjigjeve
   getResponseCount: (formId) => {
     const form = forms.get(formId);
-    if (!form) return 0;
-    return form.responses.length;
+    return form ? form.responses.length : 0;
+  },
+
+  getResponses: (formId) => {
+    const form = forms.get(formId);
+    return form ? form.responses : [];
   }
 };
 

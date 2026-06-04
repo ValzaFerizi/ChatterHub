@@ -2,7 +2,7 @@ const formService = require('../services/form.service');
 
 const formSocket = (io, socket) => {
 
-  socket.on('form:join', async (data) => {
+  socket.on('form:join', (data) => {
     socket.join(`form:${data.formId}`);
 
     const form = formService.createForm(data.formId);
@@ -29,7 +29,7 @@ const formSocket = (io, socket) => {
     });
   });
 
-  socket.on('form:submit', async (data) => {
+  socket.on('form:submit', (data) => {
     try {
       const response = formService.addResponse(
         data.formId,
@@ -59,7 +59,6 @@ const formSocket = (io, socket) => {
 
   socket.on('form:leave', (data) => {
     socket.leave(`form:${data.formId}`);
-
     io.to(`form:${data.formId}`).emit('form:user_left', {
       userId: socket.id,
       username: socket.userData.username
