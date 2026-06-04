@@ -7,6 +7,8 @@ const Permission = require('./Permission');
 const RolePermission = require('./RolePermission');
 const RefreshToken = require('./RefreshToken');
 const Notification = require('./Notification');
+const Settings = require('./Settings');
+const Files = require('./Files');
 
 // User <-> Role (many-to-many)
 User.belongsToMany(Role, { through: UserRole, foreignKey: 'user_id', as: 'roles' });
@@ -24,6 +26,9 @@ RefreshToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications', onDelete: 'CASCADE' });
 Notification.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
+User.hasMany(Files, { foreignKey: 'uploaded_by', as: 'files' });
+Files.belongsTo(User, { foreignKey: 'uploaded_by', as: 'uploader' });
+
 module.exports = {
   sequelize,
   User,
@@ -32,5 +37,7 @@ module.exports = {
   Permission,
   RolePermission,
   RefreshToken,
-  Notification
+  Notification,
+  Settings,
+  Files
 };
