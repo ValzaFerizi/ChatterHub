@@ -11,8 +11,7 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to create form',
-        error: error.message
-      });
+error: error.message || String(error)      });
     }
   },
 
@@ -28,8 +27,7 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to fetch forms',
-        error: error.message
-      });
+error: error.message || String(error)      });
     }
   },
 
@@ -51,8 +49,7 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to fetch form',
-        error: error.message
-      });
+error: error.message || String(error)      });
     }
   },
 
@@ -68,8 +65,7 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to update form',
-        error: error.message
-      });
+error: error.message || String(error)      });
     }
   },
 
@@ -84,8 +80,7 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to delete form',
-        error: error.message
-      });
+error: error.message || String(error)      });
     }
   }
 };
