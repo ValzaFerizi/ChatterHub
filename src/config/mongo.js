@@ -6,8 +6,7 @@ const connectMongo = async () => {
     await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/chatterhub');
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    console.warn('⚠️ MongoDB nuk është aktiv — vazhdon pa të:', error.message);
   }
 };
 
