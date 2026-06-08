@@ -1,25 +1,23 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
-import ProtectedRoute from './components/ProtectedRoute'
-import Login from './pages/Login'
-import Register from './pages/Register'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Dashboard from "./pages/Dashboard";
+import Forms from "./pages/Forms";
+import Sheets from "./pages/Sheets";
+import CreateForm from "./pages/CreateForm";
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={
-            <ProtectedRoute>
-              <div>Dashboard do te shtohet nga Member 4</div>
-            </ProtectedRoute>
-          } />
-        </Routes>
-      </AuthProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="forms" element={<Forms />} />
+          <Route path="sheets" element={<Sheets />} />
+          <Route path="create-form" element={<CreateForm />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
