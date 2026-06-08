@@ -49,11 +49,14 @@ const getProfile = async (req, res) => {
   try {
     const user = await findUserById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
+    const roles = user.roles ? user.roles.map(r => r.name) : [];
     res.status(200).json({
       id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
-      email: user.email
+      email: user.email,
+      roles: roles,
+      isAdmin: roles.includes('admin')
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

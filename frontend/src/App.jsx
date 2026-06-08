@@ -1,21 +1,33 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Forms from "./pages/Forms";
-import Sheets from "./pages/Sheets";
-import CreateForm from "./pages/CreateForm";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/layout";
+import Dashboard from "./pages/dashboard";
+import Forms from "./pages/forms";
+import Sheets from "./pages/sheets";
+import CreateForm from "./pages/createform";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="forms" element={<Forms />} />
-          <Route path="sheets" element={<Sheets />} />
-          <Route path="create-form" element={<CreateForm />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="forms" element={<Forms />} />
+            <Route path="sheets" element={<Sheets />} />
+            <Route path="create-form" element={<CreateForm />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
