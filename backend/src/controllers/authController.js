@@ -63,4 +63,41 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, refreshToken, logoutUser, getProfile };
+const getAllUsers = async (req, res) => {
+  try {
+    const { User, Role } = require("../models");
+    const users = await User.findAll({ attributes: ['id', 'first_name', 'last_name', 'email', 'is_active', 'created_at'], include: [{ model: Role, as: 'roles', through: { attributes: [] } }] });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deactivateUser = async (req, res) => {
+  try {
+    const { User, Role } = require("../models");
+    const { id } = req.params;
+    if (parseInt(id) === req.user.id) {
+      return res.status(400).json({ message: 'Nuk mund te deaktivizosh veten' });
+    }
+    await User.update({ is_active: false }, { where: { id } });
+    res.status(200).json({ message: 'User u deaktivizua' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateUserRole = async (req, res) => {
+  try {
+    const { userId, roleName } = req.body;
+    const { assignRole } = require('../services/roleService');
+    const { UserRole } = require('../models');
+    await UserRole.destroy({ where: { user_id: userId } });
+    await assignRole(userId, roleName);
+    res.status(200).json({ message: 'Roli u ndryshua' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, refreshToken, logoutUser, getProfile, getAllUsers, deactivateUser, updateUserRole };

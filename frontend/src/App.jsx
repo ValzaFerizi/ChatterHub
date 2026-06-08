@@ -8,6 +8,8 @@ import Sheets from "./pages/sheets";
 import CreateForm from "./pages/createform";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Users from "./pages/Users";
+import AuditLogs from "./pages/AuditLogs";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
             <Route path="forms" element={<Forms />} />
             <Route path="sheets" element={<Sheets />} />
             <Route path="create-form" element={<CreateForm />} />
+            <Route path="users" element={<Users />} />
+            <Route path="audit" element={<AuditLogs />} />
           </Route>
         </Routes>
       </AuthProvider>
