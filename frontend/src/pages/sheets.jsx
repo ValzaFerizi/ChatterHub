@@ -119,9 +119,19 @@ function Sheets() {
                 <td>{sheet.columns}</td>
                 <td>{sheet.updatedAt}</td>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sheets.map((sheet) => (
+                <tr key={sheet.id}>
+                  <td>{sheet.name}</td>
+                  <td>{sheet.form?.title || 'N/A'}</td>
+                  <td>{sheet.cells?.length || 0}</td>
+                  <td>{new Date(sheet.updated_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

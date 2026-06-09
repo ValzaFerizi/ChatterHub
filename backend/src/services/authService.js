@@ -23,6 +23,7 @@ const register = async (first_name, last_name, email, password, ipAddress) => {
 const login = async (email, password, ipAddress) => {
   const user = await findUserByEmail(email);
   if (!user) throw new Error('Invalid credentials');
+  if (!user.is_active) throw new Error('Account is deactivated');
 
   const isMatch = await bcrypt.compare(password, user.password_hash);
   if (!isMatch) throw new Error('Invalid credentials');

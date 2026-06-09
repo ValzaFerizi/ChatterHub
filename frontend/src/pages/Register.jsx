@@ -31,7 +31,7 @@ function Register() {
     <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#f8fafc'}}>
       <div className="panel" style={{width:'100%',maxWidth:'420px'}}>
         <div className="page-header" style={{textAlign:'center'}}>
-          <h1 style={{color:'#6d28d9'}}>ChatterHub</h1>
+          <h1 style={{color:'#6d28d9'}}>Formify</h1>
           <p>Krijo llogari te re</p>
         </div>
         {error && <p style={{background:'#fef2f2',color:'#dc2626',padding:'10px',borderRadius:'6px',marginBottom:'16px',fontSize:'14px'}}>{error}</p>}
