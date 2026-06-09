@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import ExportProgress from "../components/ExportProgress";
 
-const API_URL = "http://localhost:5000";
+ const API_URL = "http://localhost:5000/api";
 
 function AuditLogs() {
   const [loading, setLoading] = useState(false);
