@@ -11,20 +11,8 @@ function Forms() {
   const [progress, setProgress] = useState(0);
 
   const forms = [
-    {
-      id: "1",
-      title: "Customer Feedback Form",
-      description: "Collect customer opinions and ratings.",
-      responses: 24,
-      createdAt: "2026-06-03",
-    },
-    {
-      id: "2",
-      title: "Job Application Form",
-      description: "Collect job applicants.",
-      responses: 12,
-      createdAt: "2026-06-02",
-    },
+    { id: "1", title: "Customer Feedback Form", description: "Collect customer opinions and ratings.", responses: 24, createdAt: "2026-06-03" },
+    { id: "2", title: "Job Application Form", description: "Collect job applicants.", responses: 12, createdAt: "2026-06-02" },
   ];
 
   const handleExport = async (format) => {
@@ -32,7 +20,6 @@ function Forms() {
       setLoading(true);
       setMessage("");
       setProgress(0);
-
       const response = await axios.post(
         `${API_URL}/export/${format}`,
         format === "csv"
@@ -46,7 +33,6 @@ function Forms() {
           },
         }
       );
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -54,7 +40,6 @@ function Forms() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       setProgress(100);
       setMessage(`✅ Forms u eksportuan si ${format.toUpperCase()}!`);
     } catch (err) {
@@ -72,30 +57,16 @@ function Forms() {
           <p>Create and manage your forms.</p>
         </div>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <button
-            onClick={() => handleExport("csv")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("csv")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export CSV"}
           </button>
-          <button
-            onClick={() => handleExport("excel")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("excel")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export Excel"}
           </button>
-          <button
-            onClick={() => handleExport("json")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("json")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export JSON"}
           </button>
-          <Link className="primary-btn" to="/create-form">
-            New Form
-          </Link>
+          <Link className="primary-btn" to="/create-form">New Form</Link>
         </div>
       </div>
 
@@ -110,32 +81,14 @@ function Forms() {
               <span>{form.responses} responses</span>
               <span>{form.createdAt}</span>
             </div>
-            <button>Open Form</button>
+            <Link to={`/forms/${form.id}`} className="primary-btn" style={{ fontSize: '13px', padding: '6px 12px' }}>
+              Open
+            </Link>
           </div>
-        ) : (
-          forms.map((form) => (
-            <div className="form-card" key={form.id}>
-              <h2>{form.title}</h2>
-              <p>{form.description}</p>
-              <div className="meta">
-                <span>{form.responses?.length || 0} responses</span>
-                <span>{new Date(form.created_at).toLocaleDateString()}</span>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                <Link to={`/forms/${form.id}`} className="primary-btn" style={{ fontSize: '13px', padding: '6px 12px' }}>
-                  Open
-                </Link>
-                <button onClick={() => deleteForm(form.id)}
-                  style={{ fontSize: '13px', padding: '6px 12px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '6px', cursor: 'pointer' }}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
+        ))}
       </div>
     </div>
   );
 }
-  
- export default Forms;
+
+export default Forms;

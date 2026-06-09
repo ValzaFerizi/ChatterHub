@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import ExportProgress from "../components/ExportProgress";
+import { useSocket } from "../hooks/useSocket";
 
 const API_URL = "http://localhost:5000";
 
@@ -8,32 +9,31 @@ function Sheets() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [progress, setProgress] = useState(0);
+  const socketRef = useSocket();
 
   const sheets = [
-    {
-      id: "1",
-      name: "Customer Feedback Responses",
-      linkedForm: "Customer Feedback Form",
-      rows: 24,
-      columns: 6,
-      updatedAt: "2026-06-03",
-    },
-    {
-      id: "2",
-      name: "Job Applications",
-      linkedForm: "Job Application Form",
-      rows: 12,
-      columns: 8,
-      updatedAt: "2026-06-02",
-    },
+    { id: "1", name: "Customer Feedback Responses", linkedForm: "Customer Feedback Form", rows: 24, columns: 6, updatedAt: "2026-06-03" },
+    { id: "2", name: "Job Applications", linkedForm: "Job Application Form", rows: 12, columns: 8, updatedAt: "2026-06-02" },
   ];
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+    socket.emit("sheet:join", { sheetId: "main" });
+    socket.on("cell:updated", ({ cellId, value, updatedBy }) => {
+      console.log(`Cell ${cellId} u ndryshua nga ${updatedBy}: ${value}`);
+    });
+    socket.on("sheet:user_joined", ({ username }) => {
+      console.log(`${username} hapi sheet-in`);
+    });
+    return () => socket.emit("sheet:leave", { sheetId: "main" });
+  }, [socketRef]);
 
   const handleExport = async (format) => {
     try {
       setLoading(true);
       setMessage("");
       setProgress(0);
-
       const response = await axios.post(
         `${API_URL}/export/${format}`,
         format === "csv"
@@ -47,7 +47,6 @@ function Sheets() {
           },
         }
       );
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -55,7 +54,6 @@ function Sheets() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       setProgress(100);
       setMessage(`✅ Sheets u eksportuan si ${format.toUpperCase()}!`);
     } catch (err) {
@@ -73,25 +71,13 @@ function Sheets() {
           <p>Response tables connected to forms.</p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            onClick={() => handleExport("csv")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("csv")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export CSV"}
           </button>
-          <button
-            onClick={() => handleExport("excel")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("excel")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export Excel"}
           </button>
-          <button
-            onClick={() => handleExport("json")}
-            disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
-          >
+          <button onClick={() => handleExport("json")} disabled={loading} style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
             {loading ? "..." : "Export JSON"}
           </button>
         </div>
@@ -119,22 +105,12 @@ function Sheets() {
                 <td>{sheet.columns}</td>
                 <td>{sheet.updatedAt}</td>
               </tr>
-            </thead>
-            <tbody>
-              {sheets.map((sheet) => (
-                <tr key={sheet.id}>
-                  <td>{sheet.name}</td>
-                  <td>{sheet.form?.title || 'N/A'}</td>
-                  <td>{sheet.cells?.length || 0}</td>
-                  <td>{new Date(sheet.updated_at).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 }
 
-   export default Sheets;
+export default Sheets;

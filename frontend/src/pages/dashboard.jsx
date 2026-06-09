@@ -52,24 +52,25 @@ function Dashboard() {
         ) : activity.length === 0 ? (
           <p style={{ color: '#6b7280', fontSize: '14px' }}>Nuk ka aktivitet akoma.</p>
         ) : (
-         activity.map((log, i) => {
-  let message = '';
-  let icon = '📌';
+        activity.map((log, i) => {
+  const getInfo = (action) => {
+    switch(action) {
+      case 'LOGIN':           return { icon: '🔐', message: 'Një user u kyç në sistem' };
+      case 'REGISTER':        return { icon: '👤', message: 'Një user i ri u regjistrua' };
+      case 'LOGOUT':          return { icon: '🚪', message: 'Një user u çkyç' };
+      case 'CREATE_FORM':     return { icon: '📝', message: `Forma e re u krijua: "${log.new_value}"` };
+      case 'UPDATE_FORM':     return { icon: '✏️', message: `Forma u përditësua: "${log.new_value}"` };
+      case 'DELETE_FORM':     return { icon: '🗑️', message: `Forma u fshi: "${log.old_value}"` };
+      case 'SUBMIT_FORM':     return { icon: '✅', message: 'Dikush plotësoi një formë' };
+      case 'CREATE_QUESTION': return { icon: '❓', message: 'Pyetje e re u shtua' };
+      case 'DELETE_QUESTION': return { icon: '❌', message: 'Pyetje u fshi' };
+      case 'UPDATE_ROLE':     return { icon: '👑', message: 'Roli u ndryshua' };
+      case 'DEACTIVATE_USER': return { icon: '🚫', message: 'Një user u deaktivizua' };
+      default:                return { icon: '📌', message: action };
+    }
+  };
 
-  switch(log.action) {
-    case 'LOGIN':       icon = '🔐'; message = 'Një user u kyç në sistem'; break;
-    case 'REGISTER':    icon = '👤'; message = 'Një user i ri u regjistrua'; break;
-    case 'LOGOUT':      icon = '🚪'; message = 'Një user u çkyç'; break;
-    case 'CREATE_FORM': icon = '📝'; message = `Forma e re u krijua: "${log.new_value}"`; break;
-    case 'UPDATE_FORM': icon = '✏️'; message = `Forma u përditësua: "${log.new_value}"`; break;
-    case 'DELETE_FORM': icon = '🗑️'; message = `Forma u fshi: "${log.old_value}"`; break;
-    case 'SUBMIT_FORM': icon = '✅'; message = 'Dikush plotësoi një formë'; break;
-    case 'CREATE_QUESTION': icon = '❓'; message = 'Pyetje e re u shtua'; break;
-    case 'DELETE_QUESTION': icon = '❌'; message = 'Pyetje u fshi'; break;
-    case 'UPDATE_ROLE':  icon = '👑'; message = `Roli u ndryshua`; break;
-    case 'DEACTIVATE_USER': icon = '🚫'; message = 'Një user u deaktivizua'; break;
-    default: icon = '📌'; message = log.action;
-  }
+  const { icon, message } = getInfo(log.action);
 
   return (
     <p key={i} style={{ fontSize: '14px', padding: '8px 0', borderBottom: '1px solid #f3f4f6', color: '#374151' }}>
@@ -79,7 +80,7 @@ function Dashboard() {
       </span>
     </p>
   );
-          })
+})
         )}
       </div>
     </div>
