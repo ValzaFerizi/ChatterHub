@@ -13,12 +13,13 @@ const Register = lazy(() => import("./pages/Register"));
 const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const FormDetail = lazy(() => import("./pages/FormDetail"));
+const Search = lazy(() => import("./pages/Search"));
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Suspense fallback={<div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh'}}>Duke u ngarkuar...</div>}>
+        <Suspense fallback={<div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh'}}>Loading...</div>}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -34,6 +35,7 @@ function App() {
               <Route path="users" element={<Users />} />
               <Route path="audit" element={<AuditLogs />} />
               <Route path="forms/:id" element={<FormDetail />} />
+              <Route path="search" element={<Search />} />
             </Route>
           </Routes>
         </Suspense>

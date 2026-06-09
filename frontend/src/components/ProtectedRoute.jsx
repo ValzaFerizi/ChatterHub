@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <p style={{ color: '#6b7280' }}>Duke u ngarkuar...</p>
+        <p style={{ color: '#6b7280' }}>Loading...</p>
       </div>
     )
   }

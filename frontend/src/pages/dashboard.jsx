@@ -48,7 +48,7 @@ function Dashboard() {
       <div className="panel">
         <h2>Recent Activity</h2>
         {loading ? (
-          <p>Duke u ngarkuar...</p>
+          <p>Loading...</p>
         ) : activity.length === 0 ? (
           <p style={{ color: '#6b7280', fontSize: '14px' }}>Nuk ka aktivitet akoma.</p>
         ) : (
@@ -66,7 +66,7 @@ function Dashboard() {
     case 'SUBMIT_FORM': icon = '✅'; message = 'Dikush plotësoi një formë'; break;
     case 'CREATE_QUESTION': icon = '❓'; message = 'Pyetje e re u shtua'; break;
     case 'DELETE_QUESTION': icon = '❌'; message = 'Pyetje u fshi'; break;
-    case 'UPDATE_ROLE':  icon = '👑'; message = `Roli u ndryshua`; break;
+    case 'UPDATE_ROLE':  icon = '👑'; message = `Role u ndryshua`; break;
     case 'DEACTIVATE_USER': icon = '🚫'; message = 'Një user u deaktivizua'; break;
     default: icon = '📌'; message = log.action;
   }

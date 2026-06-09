@@ -14,7 +14,7 @@ function Forms() {
   }, []);
 
   const deleteForm = async (id) => {
-    if (!window.confirm('A je i sigurt?')) return;
+    if (!window.confirm('Are you sure?')) return;
     try {
       await api.delete(`/forms/${id}`);
       setForms(forms.filter(f => f.id !== id));
@@ -23,7 +23,7 @@ function Forms() {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px' }}>Duke u ngarkuar...</div>;
+  if (loading) return <div style={{ padding: '20px' }}>Loading...</div>;
 
   return (
     <div>

@@ -10,9 +10,18 @@ function Navbar() {
     navigate('/login')
   }
 
+  const handleSearch = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      navigate(`/search?q=${e.target.value.trim()}`)
+    }
+  }
+
   return (
     <header className="navbar">
-      <input placeholder="Search forms, sheets..." />
+      <input
+        placeholder="Search forms, sheets..."
+        onKeyDown={handleSearch}
+      />
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         {user && (
           <span style={{ fontSize: '14px', color: '#6b7280' }}>

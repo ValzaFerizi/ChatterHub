@@ -12,7 +12,7 @@ function Sheets() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={{ padding: '20px' }}>Duke u ngarkuar...</div>;
+  if (loading) return <div style={{ padding: '20px' }}>Loading...</div>;
 
   return (
     <div>

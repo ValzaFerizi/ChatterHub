@@ -45,7 +45,7 @@ function FormDetail() {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px' }}>Duke u ngarkuar...</div>;
+  if (loading) return <div style={{ padding: '20px' }}>Loading...</div>;
   if (!form) return <div style={{ padding: '20px' }}>Forma nuk u gjet.</div>;
 
   return (
