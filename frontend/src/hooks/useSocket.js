@@ -7,13 +7,11 @@ export const useSocket = () => {
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
     if (!token) return
-
     socketRef.current = io('http://localhost:5000', {
       auth: { token }
     })
-
     return () => socketRef.current?.disconnect()
   }, [])
 
-  return socketRef.current
+  return socketRef
 }

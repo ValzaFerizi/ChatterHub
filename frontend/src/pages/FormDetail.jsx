@@ -16,7 +16,7 @@ function FormDetail() {
       .then(res => setForm(res.data.data || res.data))
       .catch(() => navigate('/forms'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   const handleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
