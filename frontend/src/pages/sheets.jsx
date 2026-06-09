@@ -1,22 +1,18 @@
+import { useState, useEffect } from 'react';
+import api from '../api/api';
+
 function Sheets() {
-  const sheets = [
-    {
-      id: "1",
-      name: "Customer Feedback Responses",
-      linkedForm: "Customer Feedback Form",
-      rows: 24,
-      columns: 6,
-      updatedAt: "2026-06-03",
-    },
-    {
-      id: "2",
-      name: "Job Applications",
-      linkedForm: "Job Application Form",
-      rows: 12,
-      columns: 8,
-      updatedAt: "2026-06-02",
-    },
-  ];
+  const [sheets, setSheets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/sheets')
+      .then(res => setSheets(res.data.sheets || res.data || []))
+      .catch(() => setSheets([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ padding: '20px' }}>Duke u ngarkuar...</div>;
 
   return (
     <div>
@@ -26,29 +22,30 @@ function Sheets() {
       </div>
 
       <div className="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Sheet Name</th>
-              <th>Linked Form</th>
-              <th>Rows</th>
-              <th>Columns</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {sheets.map((sheet) => (
-              <tr key={sheet.id}>
-                <td>{sheet.name}</td>
-                <td>{sheet.linkedForm}</td>
-                <td>{sheet.rows}</td>
-                <td>{sheet.columns}</td>
-                <td>{sheet.updatedAt}</td>
+        {sheets.length === 0 ? (
+          <p style={{ padding: '20px', color: '#6b7280' }}>Nuk ka sheets akoma.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Sheet Name</th>
+                <th>Linked Form</th>
+                <th>Rows</th>
+                <th>Updated</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sheets.map((sheet) => (
+                <tr key={sheet.id}>
+                  <td>{sheet.name}</td>
+                  <td>{sheet.form?.title || 'N/A'}</td>
+                  <td>{sheet.cells?.length || 0}</td>
+                  <td>{new Date(sheet.updated_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
