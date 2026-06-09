@@ -2,11 +2,13 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 function Navbar() {
-  const { user, logout } = useAuth()
+  const auth = useAuth()
+  const user = auth?.user
+  const logout = auth?.logout
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await logout()
+    if (logout) await logout()
     navigate('/login')
   }
 
@@ -29,4 +31,4 @@ function Navbar() {
   )
 }
 
-export default Navbar
+  export default Navbar
