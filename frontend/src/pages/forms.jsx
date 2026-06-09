@@ -112,7 +112,27 @@ function Forms() {
             </div>
             <button>Open Form</button>
           </div>
-        ))}
+        ) : (
+          forms.map((form) => (
+            <div className="form-card" key={form.id}>
+              <h2>{form.title}</h2>
+              <p>{form.description}</p>
+              <div className="meta">
+                <span>{form.responses?.length || 0} responses</span>
+                <span>{new Date(form.created_at).toLocaleDateString()}</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <Link to={`/forms/${form.id}`} className="primary-btn" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                  Open
+                </Link>
+                <button onClick={() => deleteForm(form.id)}
+                  style={{ fontSize: '13px', padding: '6px 12px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '6px', cursor: 'pointer' }}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
