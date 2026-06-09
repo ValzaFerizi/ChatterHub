@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Users from "./pages/users";
 import Responses from "./pages/responses";
 import AuditLogs from "./pages/auditlogs";
+import FormDetail from "./pages/FormDetail";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="users" element={<Users />} />
           <Route path="responses" element={<Responses />} />
           <Route path="audit-logs" element={<AuditLogs />} />
+          <Route path="forms/:id" element={<FormDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
