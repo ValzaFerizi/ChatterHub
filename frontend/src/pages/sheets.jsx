@@ -1,11 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
+import ExportProgress from "../components/ExportProgress";
 
 const API_URL = "http://localhost:5000";
 
 function Sheets() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [progress, setProgress] = useState(0);
 
   const sheets = [
     {
@@ -30,13 +32,20 @@ function Sheets() {
     try {
       setLoading(true);
       setMessage("");
+      setProgress(0);
 
       const response = await axios.post(
         `${API_URL}/export/${format}`,
         format === "csv"
           ? { data: sheets, fields: ["id", "name", "linkedForm", "rows", "columns", "updatedAt"] }
           : { data: sheets },
-        { responseType: "blob" }
+        {
+          responseType: "blob",
+          onDownloadProgress: (e) => {
+            const percent = Math.round((e.loaded * 100) / (e.total || 1));
+            setProgress(percent);
+          },
+        }
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -47,6 +56,7 @@ function Sheets() {
       link.click();
       link.remove();
 
+      setProgress(100);
       setMessage(`✅ Sheets u eksportuan si ${format.toUpperCase()}!`);
     } catch (err) {
       setMessage(`❌ Export dështoi: ${err.message}`);
@@ -86,11 +96,9 @@ function Sheets() {
           </button>
         </div>
       </div>
-      {message && (
-        <p style={{ padding: "10px", borderRadius: "6px", backgroundColor: message.includes("✅") ? "#f0fdf4" : "#fef2f2", color: message.includes("✅") ? "#16a34a" : "#dc2626", marginBottom: "16px" }}>
-          {message}
-        </p>
-      )}
+
+      <ExportProgress loading={loading} message={message} progress={progress} />
+
       <div className="table-box">
         <table>
           <thead>
@@ -119,4 +127,4 @@ function Sheets() {
   );
 }
 
-  export default Sheets;
+   export default Sheets;

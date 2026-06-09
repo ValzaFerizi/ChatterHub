@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import ExportProgress from "../components/ExportProgress";
 
 const API_URL = "http://localhost:5000";
 
 function Forms() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [progress, setProgress] = useState(0);
 
   const forms = [
     {
@@ -29,13 +31,20 @@ function Forms() {
     try {
       setLoading(true);
       setMessage("");
+      setProgress(0);
 
       const response = await axios.post(
         `${API_URL}/export/${format}`,
         format === "csv"
           ? { data: forms, fields: ["id", "title", "description", "responses", "createdAt"] }
           : { data: forms },
-        { responseType: "blob" }
+        {
+          responseType: "blob",
+          onDownloadProgress: (e) => {
+            const percent = Math.round((e.loaded * 100) / (e.total || 1));
+            setProgress(percent);
+          },
+        }
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -46,6 +55,7 @@ function Forms() {
       link.click();
       link.remove();
 
+      setProgress(100);
       setMessage(`✅ Forms u eksportuan si ${format.toUpperCase()}!`);
     } catch (err) {
       setMessage(`❌ Export dështoi: ${err.message}`);
@@ -88,11 +98,9 @@ function Forms() {
           </Link>
         </div>
       </div>
-      {message && (
-        <p style={{ padding: "10px", borderRadius: "6px", backgroundColor: message.includes("✅") ? "#f0fdf4" : "#fef2f2", color: message.includes("✅") ? "#16a34a" : "#dc2626", marginBottom: "16px" }}>
-          {message}
-        </p>
-      )}
+
+      <ExportProgress loading={loading} message={message} progress={progress} />
+
       <div className="forms-grid">
         {forms.map((form) => (
           <div className="form-card" key={form.id}>
@@ -109,5 +117,5 @@ function Forms() {
     </div>
   );
 }
-
-  export default Forms;
+  
+ export default Forms;
