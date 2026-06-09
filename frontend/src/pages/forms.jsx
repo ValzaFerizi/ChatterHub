@@ -1,29 +1,68 @@
-import api from '../api/api';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import ExportProgress from "../components/ExportProgress";
+
+const API_URL = "http://localhost:5000";
 
 function Forms() {
-  const [forms, setForms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    api.get('/forms')
-      .then(res => setForms(res.data.data || res.data.forms || res.data || []))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+  const forms = [
+    {
+      id: "1",
+      title: "Customer Feedback Form",
+      description: "Collect customer opinions and ratings.",
+      responses: 24,
+      createdAt: "2026-06-03",
+    },
+    {
+      id: "2",
+      title: "Job Application Form",
+      description: "Collect job applicants.",
+      responses: 12,
+      createdAt: "2026-06-02",
+    },
+  ];
 
-  const deleteForm = async (id) => {
-    if (!window.confirm('A je i sigurt?')) return;
+  const handleExport = async (format) => {
     try {
-      await api.delete(`/forms/${id}`);
-      setForms(forms.filter(f => f.id !== id));
+      setLoading(true);
+      setMessage("");
+      setProgress(0);
+
+      const response = await axios.post(
+        `${API_URL}/export/${format}`,
+        format === "csv"
+          ? { data: forms, fields: ["id", "title", "description", "responses", "createdAt"] }
+          : { data: forms },
+        {
+          responseType: "blob",
+          onDownloadProgress: (e) => {
+            const percent = Math.round((e.loaded * 100) / (e.total || 1));
+            setProgress(percent);
+          },
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `forms-export.${format === "excel" ? "xlsx" : format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setProgress(100);
+      setMessage(`✅ Forms u eksportuan si ${format.toUpperCase()}!`);
     } catch (err) {
-      alert('Gabim gjatë fshirjes');
+      setMessage(`❌ Export dështoi: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
-
-  if (loading) return <div style={{ padding: '20px' }}>Duke u ngarkuar...</div>;
 
   return (
     <div>
@@ -32,16 +71,46 @@ function Forms() {
           <h1>Forms</h1>
           <p>Create and manage your forms.</p>
         </div>
-        <Link className="primary-btn" to="/create-form">New Form</Link>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <button
+            onClick={() => handleExport("csv")}
+            disabled={loading}
+            style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
+          >
+            {loading ? "..." : "Export CSV"}
+          </button>
+          <button
+            onClick={() => handleExport("excel")}
+            disabled={loading}
+            style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
+          >
+            {loading ? "..." : "Export Excel"}
+          </button>
+          <button
+            onClick={() => handleExport("json")}
+            disabled={loading}
+            style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}
+          >
+            {loading ? "..." : "Export JSON"}
+          </button>
+          <Link className="primary-btn" to="/create-form">
+            New Form
+          </Link>
+        </div>
       </div>
 
+      <ExportProgress loading={loading} message={message} progress={progress} />
+
       <div className="forms-grid">
-        {forms.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
-            <p>Nuk ka forma akoma.</p>
-            <Link className="primary-btn" to="/create-form" style={{ marginTop: '12px', display: 'inline-block' }}>
-              Krijo formën e parë
-            </Link>
+        {forms.map((form) => (
+          <div className="form-card" key={form.id}>
+            <h2>{form.title}</h2>
+            <p>{form.description}</p>
+            <div className="meta">
+              <span>{form.responses} responses</span>
+              <span>{form.createdAt}</span>
+            </div>
+            <button>Open Form</button>
           </div>
         ) : (
           forms.map((form) => (
@@ -68,5 +137,5 @@ function Forms() {
     </div>
   );
 }
-
-export default Forms;
+  
+ export default Forms;
