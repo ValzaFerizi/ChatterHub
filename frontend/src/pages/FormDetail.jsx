@@ -36,7 +36,7 @@ function FormDetail() {
         questionId: parseInt(questionId),
         value: answers[questionId]
       }));
-      await api.post('/responses', { formId: parseInt(id), answers: answerList });
+      await api.post(`/responses/forms/${id}/responses`, { answers: answerList });
       setSubmitted(true);
     } catch (err) {
       alert('Gabim gjatë dërgimit: ' + (err.response?.data?.message || err.message));
