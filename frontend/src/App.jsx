@@ -14,6 +14,7 @@ const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const FormDetail = lazy(() => import("./pages/FormDetail"));
 const Search = lazy(() => import("./pages/Search"));
+const Responses = lazy(() => import("./pages/responses"));
 
 function App() {
   return (
@@ -33,7 +34,9 @@ function App() {
               <Route path="sheets" element={<Sheets />} />
               <Route path="create-form" element={<CreateForm />} />
               <Route path="users" element={<Users />} />
+              <Route path="responses" element={<Responses />} />
               <Route path="audit" element={<AuditLogs />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
               <Route path="forms/:id" element={<FormDetail />} />
               <Route path="search" element={<Search />} />
             </Route>

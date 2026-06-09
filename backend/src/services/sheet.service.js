@@ -1,54 +1,44 @@
-const sheets = new Map();
+const { Sheet } = require('../models')
 
 const sheetService = {
-  // Krijo sheet të ri
-  createSheet: (sheetId) => {
-    if (!sheets.has(sheetId)) {
-      sheets.set(sheetId, {
-        id: sheetId,
-        cells: {},
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    }
-    return sheets.get(sheetId);
+
+  createSheet: async (formId, name = 'Untitled Sheet', createdBy = null) => {
+    const existing = await Sheet.findOne({ where: { formId } })
+    if (existing) return existing
+    return await Sheet.create({ formId, name, cells: {}, createdBy })
   },
 
-  // Merr sheet-in
-  getSheet: (sheetId) => {
-    return sheets.get(sheetId) || null;
+  getSheet: async (sheetId) => {
+    return await Sheet.findByPk(sheetId)
   },
 
-  // Përditëso një cell
-  updateCell: (sheetId, cellId, value, updatedBy) => {
-    if (!sheets.has(sheetId)) {
-      sheetService.createSheet(sheetId);
-    }
-
-    const sheet = sheets.get(sheetId);
-    sheet.cells[cellId] = {
-      value,
-      updatedBy,
-      updatedAt: new Date()
-    };
-    sheet.updatedAt = new Date();
-
-    return sheet.cells[cellId];
+  getSheetByFormId: async (formId) => {
+    return await Sheet.findOne({ where: { formId } })
   },
 
-  // Merr një cell specifike
-  getCell: (sheetId, cellId) => {
-    const sheet = sheets.get(sheetId);
-    if (!sheet) return null;
-    return sheet.cells[cellId] || null;
+  updateCell: async (sheetId, cellId, value, updatedBy) => {
+    const sheet = await Sheet.findByPk(sheetId)
+    if (!sheet) return null
+    const cells = { ...sheet.cells, [cellId]: { value, updatedBy, updatedAt: new Date() } }
+    await sheet.update({ cells })
+    return cells[cellId]
   },
 
-  // Merr të gjitha cells e sheet-it
-  getAllCells: (sheetId) => {
-    const sheet = sheets.get(sheetId);
-    if (!sheet) return {};
-    return sheet.cells;
+  getCell: async (sheetId, cellId) => {
+    const sheet = await Sheet.findByPk(sheetId)
+    if (!sheet) return null
+    return sheet.cells[cellId] || null
+  },
+
+  getAllCells: async (sheetId) => {
+    const sheet = await Sheet.findByPk(sheetId)
+    if (!sheet) return {}
+    return sheet.cells
+  },
+
+  getAllSheets: async () => {
+    return await Sheet.findAll()
   }
-};
+}
 
-module.exports = sheetService;
+module.exports = sheetService

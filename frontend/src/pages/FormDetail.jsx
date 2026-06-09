@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/api';
+import { useSocket } from '../hooks/useSocket';
 
 function FormDetail() {
   const { id } = useParams();
@@ -10,13 +11,26 @@ function FormDetail() {
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const socketRef = useSocket()
+  const [activeUsers, setActiveUsers] = useState([])
 
   useEffect(() => {
     api.get(`/forms/${id}`)
       .then(res => setForm(res.data.data || res.data))
       .catch(() => navigate('/forms'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
+
+  useEffect(() => {
+  const socket = socketRef.current
+  if (!socket || !id) return
+  socket.emit('form:join', { formId: id })
+  socket.on('presence:form_users', ({ users }) => setActiveUsers(users))
+  return () => {
+    socket.emit('form:leave', { formId: id })
+    socket.off('presence:form_users')
+  }
+}, [socketRef, id])
 
   const handleAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -36,7 +50,7 @@ function FormDetail() {
         questionId: parseInt(questionId),
         value: answers[questionId]
       }));
-      await api.post('/responses', { formId: parseInt(id), answers: answerList });
+      await api.post(`/responses/forms/${id}/responses`, { answers: answerList });
       setSubmitted(true);
     } catch (err) {
       alert('Gabim gjatë dërgimit: ' + (err.response?.data?.message || err.message));
@@ -186,6 +200,21 @@ function FormDetail() {
       <div className="panel" style={{ marginTop: '20px' }}>
         <h2>Përgjigjet — {form.responses?.length || 0} gjithsej</h2>
       </div>
+      {activeUsers.length > 0 && (
+  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', margin: '12px 0' }}>
+    <span style={{ fontSize: '13px', color: '#6b7280' }}>Duke parë tani:</span>
+    {activeUsers.map((u, i) => (
+      <div key={i} title={u.username} style={{
+        width: 30, height: 30, borderRadius: '50%',
+        background: '#6d28d9', color: '#fff',
+        display: 'flex', alignItems: 'center',
+        justifyContent: 'center', fontSize: '13px', fontWeight: 600
+      }}>
+        {u.username?.[0]?.toUpperCase()}
+      </div>
+    ))}
+  </div>
+)}
     </div>
   );
 }

@@ -20,9 +20,10 @@ const FormRepository = {
       if (q.options && q.options.length > 0) {
         await Promise.all(q.options.map((opt, i) =>
           QuestionOption.create({
-            questionId: question.id,
-            label: typeof opt === 'string' ? opt : opt.label,
-            order_index: i
+          questionId: question.id,
+          label: typeof opt === 'string' ? opt : opt.label,
+          value: typeof opt === 'string' ? opt : opt.label,
+          order_index: i
           })
         ));
       }
