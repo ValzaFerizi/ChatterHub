@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Users from "./pages/Users";
 import AuditLogs from "./pages/AuditLogs";
+import FormDetail from './pages/FormDetail';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="create-form" element={<CreateForm />} />
             <Route path="users" element={<Users />} />
             <Route path="audit" element={<AuditLogs />} />
+            <Route path="forms/:id" element={<FormDetail />} />
           </Route>
         </Routes>
       </AuthProvider>
