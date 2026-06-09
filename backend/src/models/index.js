@@ -10,6 +10,10 @@ const Notification   = require('./Notification');
 const Settings       = require('./Settings');
 const Files          = require('./Files');
 
+const PasswordResetToken = require('./PasswordResetToken');
+const LoginAttempt       = require('./LoginAttempt');
+const UserSession        = require('./UserSession');
+
 const Form           = require('./Form');
 const Section        = require('./Section');
 const Question       = require('./Question');
@@ -43,6 +47,10 @@ ResponseAnswer.belongsTo(Response, { foreignKey: 'responseId', as: 'response' })
 Question.hasMany(ResponseAnswer, { foreignKey: 'questionId', as: 'responseAnswers', onDelete: 'CASCADE' });
 ResponseAnswer.belongsTo(Question, { foreignKey: 'questionId', as: 'question' });
 User.hasMany(Form, { foreignKey: 'ownerId', as: 'forms' });
+User.hasMany(PasswordResetToken, { foreignKey: 'user_id', as: 'passwordResetTokens', onDelete: 'CASCADE' });
+PasswordResetToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+User.hasMany(UserSession, { foreignKey: 'user_id', as: 'userSessions', onDelete: 'CASCADE' });
+UserSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Form.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
 
 module.exports = {
@@ -50,5 +58,6 @@ module.exports = {
   User, Role, UserRole, Permission, RolePermission,
   RefreshToken, Notification, Settings, Files,
   Form, Section, Question, QuestionOption,
-  Response, ResponseAnswer
+  Response, ResponseAnswer,
+  PasswordResetToken, LoginAttempt, UserSession
 };
