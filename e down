@@ -1,0 +1,10 @@
+[33m6fef5eb[m[33m ([m[1;31morigin/Backend--member2[m[33m)[m Resolve conflicts with main
+[33mede76ac[m Finished branch work
+[33mf9045ac[m update package-lock.json after npm install
+[33mae59e48[m fix: remove duplicate sockets/ folder, src/ is the canonical location
+[33mccc9ffb[m feat: add member-3 realtime socket server in sockets/ folder
+[33m4ee0092[m Merge pull request #3 from ValzaFerizi/feature/auth-backend
+[33med7f04d[m[33m ([m[1;31morigin/feature/auth-backend[m[33m)[m Merge branch 'main' into feature/auth-backend
+[33me3d3211[m feat: add Settings and Files models
+[33madd0edc[m feat: add frontend auth pages, MongoDB models, validation middleware, README
+[33ma199023[m feat: add MySQL models, MongoDB integration, fix auth service and middleware

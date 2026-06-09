@@ -2,8 +2,9 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Sidebar() {
-  const { user } = useAuth()
-  const isAdmin = user?.isAdmin
+  const auth = useAuth();
+  const user = auth?.user;
+  const isAdmin = user?.isAdmin;
 
   return (
     <aside className="sidebar">
@@ -29,4 +30,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar;
+  export default Sidebar;
