@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Forms from "./pages/Forms";
-import Sheets from "./pages/Sheets";
-import CreateForm from "./pages/CreateForm";
+import Layout from "./components/layout";
+import Dashboard from "./pages/dashboard";
+import Forms from "./pages/forms";
+import Sheets from "./pages/sheets";
+import CreateForm from "./pages/createform";
 
 function App() {
   return (
@@ -19,5 +19,5 @@ function App() {
     </BrowserRouter>
   );
 }
-
-export default App;
+ 
+   export default App;
