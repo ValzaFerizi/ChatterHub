@@ -4,6 +4,7 @@ const FormController = {
   async createForm(req, res) {
     try {
       const form = await FormRepository.createForm(req.body);
+
       return res.status(201).json({
         message: 'Form created successfully',
         data: form
@@ -11,13 +12,21 @@ const FormController = {
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to create form',
-error: error.message || String(error)      });
+        error: error.message || String(error)
+      });
     }
   },
 
   async getForms(req, res) {
     try {
       const ownerId = req.user?.id || req.query.ownerId;
+
+      if (!ownerId) {
+        return res.status(400).json({
+          message: 'ownerId is required'
+        });
+      }
+
       const forms = await FormRepository.findFormsByOwner(ownerId);
 
       return res.status(200).json({
@@ -27,7 +36,8 @@ error: error.message || String(error)      });
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to fetch forms',
-error: error.message || String(error)      });
+        error: error.message || String(error)
+      });
     }
   },
 
@@ -49,7 +59,8 @@ error: error.message || String(error)      });
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to fetch form',
-error: error.message || String(error)      });
+        error: error.message || String(error)
+      });
     }
   },
 
@@ -58,6 +69,12 @@ error: error.message || String(error)      });
       const { formId } = req.params;
       const updatedForm = await FormRepository.updateForm(formId, req.body);
 
+      if (!updatedForm) {
+        return res.status(404).json({
+          message: 'Form not found'
+        });
+      }
+
       return res.status(200).json({
         message: 'Form updated successfully',
         data: updatedForm
@@ -65,14 +82,21 @@ error: error.message || String(error)      });
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to update form',
-error: error.message || String(error)      });
+        error: error.message || String(error)
+      });
     }
   },
 
   async deleteForm(req, res) {
     try {
       const { formId } = req.params;
-      await FormRepository.deleteForm(formId);
+      const deleted = await FormRepository.deleteForm(formId);
+
+      if (!deleted) {
+        return res.status(404).json({
+          message: 'Form not found'
+        });
+      }
 
       return res.status(200).json({
         message: 'Form deleted successfully'
@@ -80,7 +104,54 @@ error: error.message || String(error)      });
     } catch (error) {
       return res.status(500).json({
         message: 'Failed to delete form',
-error: error.message || String(error)      });
+        error: error.message || String(error)
+      });
+    }
+  },
+
+  async publishForm(req, res) {
+    try {
+      const { formId } = req.params;
+      const form = await FormRepository.publishForm(formId);
+
+      if (!form) {
+        return res.status(404).json({
+          message: 'Form not found'
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Form published successfully',
+        data: form
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Failed to publish form',
+        error: error.message || String(error)
+      });
+    }
+  },
+
+  async unpublishForm(req, res) {
+    try {
+      const { formId } = req.params;
+      const form = await FormRepository.unpublishForm(formId);
+
+      if (!form) {
+        return res.status(404).json({
+          message: 'Form not found'
+        });
+      }
+
+      return res.status(200).json({
+        message: 'Form unpublished successfully',
+        data: form
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Failed to unpublish form',
+        error: error.message || String(error)
+      });
     }
   }
 };
