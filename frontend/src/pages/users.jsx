@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 
+ const API_URL = "/api";
+
 function Users() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)

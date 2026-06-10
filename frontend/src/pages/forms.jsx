@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import ExportProgress from "../components/ExportProgress";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "/api";
 
 function Forms() {
   const [loading, setLoading] = useState(false);

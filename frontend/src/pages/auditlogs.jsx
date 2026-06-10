@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
+const API_URL = "/api";
+
 function AuditLogs() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
