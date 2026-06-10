@@ -27,9 +27,9 @@ const upload = multer({ storage });
 // ===========================
 // EXPORT ROUTES
 // ===========================
-router.post('/export/csv', exportCSV);
-router.post('/export/json', exportJSON);
-router.post('/export/excel', exportExcel);
+router.post('/csv', exportCSV);
+router.post('/json', exportJSON);
+router.post('/excel', exportExcel);
 
 // ===========================
 // IMPORT ROUTES

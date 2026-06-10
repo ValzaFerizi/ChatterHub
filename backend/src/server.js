@@ -18,6 +18,7 @@ const formRoutes         = require('./routes/form.routes');
 const sectionRoutes      = require('./routes/section.routes');
 const questionRoutes     = require('./routes/question.routes');
 const responseRoutes     = require('./routes/response.routes');
+const searchRoutes       = require('./routes/searchRoutes');
 
 const app    = express();
 const server = http.createServer(app);
@@ -32,6 +33,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth',        authRoutes);
 app.use('/api/roles',       roleRoutes);
 app.use('/api/audit',       auditRoutes);
+app.use('/api/search',      searchRoutes);
 app.use('/api/permissions', permissionRoutes);
 app.use('/api/export',      exportImportRoutes);
 app.use('/api/reports',     reportRoutes);

@@ -9,6 +9,13 @@ services:
       - "5000:5000"
     env_file:
       - .env
+    environment:
+      - DB_NAME=chatterhub_db
+      - DB_USER=chatterhub_user
+      - DB_PASSWORD=chatterhub_pass123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DIALECT=postgres
     depends_on:
       - postgres
       - mongodb

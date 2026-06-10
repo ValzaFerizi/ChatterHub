@@ -1,109 +1,111 @@
-import { useState } from "react";
-import axios from "axios";
-import ExportProgress from "../components/ExportProgress";
-
-const API_URL = "http://localhost:5000";
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useAuth } from '../context/AuthContext'
 
 function Users() {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [progress, setProgress] = useState(0);
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const { user: currentUser } = useAuth()
 
-  const users = [
-    { id: "1", first_name: "John", last_name: "Doe", email: "john@example.com", role: "Admin", is_active: true, created_at: "2026-06-01" },
-    { id: "2", first_name: "Jane", last_name: "Doe", email: "jane@example.com", role: "User", is_active: true, created_at: "2026-06-02" },
-    { id: "3", first_name: "Bob", last_name: "Smith", email: "bob@example.com", role: "User", is_active: false, created_at: "2026-06-03" },
-  ];
+  useEffect(() => {
+    fetchUsers()
+  }, [])
 
-  const handleExport = async (format) => {
+  const fetchUsers = async () => {
     try {
-      setLoading(true);
-      setMessage("");
-      setProgress(0);
-
-      const response = await axios.post(
-        `${API_URL}/export/${format}`,
-        format === "csv"
-          ? { data: users, fields: ["id", "first_name", "last_name", "email", "role", "is_active", "created_at"] }
-          : { data: users },
-        {
-          responseType: "blob",
-          onDownloadProgress: (e) => {
-            const percent = Math.round((e.loaded * 100) / (e.total || 1));
-            setProgress(percent);
-          },
-        }
-      );
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `users-export.${format === "excel" ? "xlsx" : format}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      setProgress(100);
-      setMessage(`✅ Users u eksportuan si ${format.toUpperCase()}!`);
+      const res = await axios.get('/api/auth/users')
+      setUsers(res.data)
     } catch (err) {
-      setMessage(`❌ Export dështoi: ${err.message}`);
+      setError('Failed to load users')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const handleDeactivate = async (id) => {
+    if (!window.confirm('Are you sure?')) return
+    try {
+      await axios.patch(`/api/auth/users/${id}/deactivate`)
+      fetchUsers()
+    } catch (err) {
+      alert('Error during deactivation')
+    }
+  }
+
+  const handleRoleChange = async (userId, roleName) => {
+    if (userId === currentUser?.id) return
+    try {
+      await axios.patch('/api/auth/users/role', { userId, roleName })
+      fetchUsers()
+    } catch (err) {
+      alert('Error changing role')
+    }
+  }
+
+  if (loading) return <div className="page-header"><p>Loading...</p></div>
+  if (error) return <div className="page-header"><p style={{color:'#dc2626'}}>{error}</p></div>
 
   return (
     <div>
-      <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1>Users</h1>
-          <p>Manage system users.</p>
-        </div>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => handleExport("csv")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export CSV"}
-          </button>
-          <button onClick={() => handleExport("excel")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export Excel"}
-          </button>
-          <button onClick={() => handleExport("json")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export JSON"}
-          </button>
-        </div>
+      <div className="page-header">
+        <h1>Users</h1>
+        <p>User Management</p>
       </div>
-
-      <ExportProgress loading={loading} message={message} progress={progress} />
-
       <div className="table-box">
         <table>
           <thead>
             <tr>
+              <th>ID</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Email</th>
-              <th>Role</th>
               <th>Active</th>
-              <th>Created</th>
+              <th>Role</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td>{user.first_name}</td>
-                <td>{user.last_name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>{user.is_active ? "✅" : "❌"}</td>
-                <td>{user.created_at}</td>
-              </tr>
-            ))}
+            {users.map(user => {
+              const currentRole = user.roles?.[0]?.name || 'user'
+              const isCurrentUser = currentUser?.id === user.id
+              return (
+                <tr key={user.id}>
+                  <td>{user.id}</td>
+                  <td>{user.first_name}</td>
+                  <td>{user.last_name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.is_active ? '✅' : '❌'}</td>
+                  <td>
+                    {!isCurrentUser ? (
+                      <select
+                        value={currentRole}
+                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                        style={{padding:'4px 8px',borderRadius:'4px',border:'1px solid #d1d5db',fontSize:'13px'}}>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    ) : (
+                      <span style={{fontSize:'13px',color:'#6b7280'}}>{currentRole}</span>
+                    )}
+                  </td>
+                  <td>
+                    {!isCurrentUser && user.is_active && (
+                      <button
+                        onClick={() => handleDeactivate(user.id)}
+                        style={{padding:'4px 12px',background:'#dc2626',color:'#fff',border:'none',borderRadius:'4px',cursor:'pointer',fontSize:'13px'}}>
+                        Deactivate
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }
-export default Users;
+
+export default Users
