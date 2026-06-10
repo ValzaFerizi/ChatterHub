@@ -1,7 +1,12 @@
+const mongoose = require('mongoose');
 const AuditLog = require('../models/mongo/AuditLog');
 const { User } = require('../models');
 
 const createLog = async (userId, action, entity, entityId, oldValue, newValue, ipAddress) => {
+  if (mongoose.connection.readyState !== 1) {
+    console.warn('⚠️ Audit log skipped: MongoDB not connected');
+    return null;
+  }
   return await AuditLog.create({
     user_id: userId,
     action,
