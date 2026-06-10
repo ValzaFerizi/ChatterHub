@@ -21,6 +21,23 @@ function Dashboard() {
     }).finally(() => setLoading(false));
   }, []);
 
+  const getInfo = (log) => {
+    switch (log.action) {
+      case 'LOGIN':           return { icon: '🔐', message: 'A user logged in' };
+      case 'REGISTER':        return { icon: '👤', message: 'A new user registered' };
+      case 'LOGOUT':          return { icon: '🚪', message: 'A user logged out' };
+      case 'CREATE_FORM':     return { icon: '📝', message: `New form created: "${log.new_value}"` };
+      case 'UPDATE_FORM':     return { icon: '✏️', message: `Form updated: "${log.new_value}"` };
+      case 'DELETE_FORM':     return { icon: '🗑️', message: `Form deleted: "${log.old_value}"` };
+      case 'SUBMIT_FORM':     return { icon: '✅', message: 'Someone submitted a form' };
+      case 'CREATE_QUESTION': return { icon: '❓', message: 'New question added' };
+      case 'DELETE_QUESTION': return { icon: '❌', message: 'Question deleted' };
+      case 'UPDATE_ROLE':     return { icon: '👑', message: 'User role updated' };
+      case 'DEACTIVATE_USER': return { icon: '🚫', message: 'A user was deactivated' };
+      default:                return { icon: '📌', message: log.action };
+    }
+  };
+
   return (
     <div>
       <div className="page-header">
@@ -55,22 +72,7 @@ function Dashboard() {
           <p style={{ color: '#6b7280', fontSize: '14px' }}>No activity yet.</p>
         ) : (
           activity.map((log, i) => {
-            let message = '';
-            let icon = '📌';
-            switch(log.action) {
-              case 'LOGIN':           icon = '🔐'; message = 'A user logged in'; break;
-              case 'REGISTER':        icon = '👤'; message = 'A new user registered'; break;
-              case 'LOGOUT':          icon = '🚪'; message = 'A user logged out'; break;
-              case 'CREATE_FORM':     icon = '📝'; message = `New form created: "${log.new_value}"`; break;
-              case 'UPDATE_FORM':     icon = '✏️'; message = `Form updated: "${log.new_value}"`; break;
-              case 'DELETE_FORM':     icon = '🗑️'; message = `Form deleted: "${log.old_value}"`; break;
-              case 'SUBMIT_FORM':     icon = '✅'; message = 'Someone submitted a form'; break;
-              case 'CREATE_QUESTION': icon = '❓'; message = 'New question added'; break;
-              case 'DELETE_QUESTION': icon = '❌'; message = 'Question deleted'; break;
-              case 'UPDATE_ROLE':     icon = '👑'; message = 'User role updated'; break;
-              case 'DEACTIVATE_USER': icon = '🚫'; message = 'A user was deactivated'; break;
-              default: icon = '📌'; message = log.action;
-            }
+            const { icon, message } = getInfo(log);
             return (
               <p key={i} style={{ fontSize: '14px', padding: '8px 0', borderBottom: '1px solid #f3f4f6', color: '#374151' }}>
                 {icon} {message}
@@ -80,7 +82,6 @@ function Dashboard() {
               </p>
             );
           })
-
         )}
       </div>
     </div>

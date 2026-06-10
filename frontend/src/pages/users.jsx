@@ -19,19 +19,19 @@ function Users() {
       const res = await axios.get('/api/auth/users')
       setUsers(res.data)
     } catch (err) {
-      setError('Nuk u ngarkuan users')
+      setError('Failed to load users')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeactivate = async (id) => {
-    if (!window.confirm('A je i sigurt?')) return
+    if (!window.confirm('Are you sure?')) return
     try {
       await axios.patch(`/api/auth/users/${id}/deactivate`)
       fetchUsers()
     } catch (err) {
-      alert('Gabim gjate deaktivizimit')
+      alert('Error during deactivation')
     }
   }
 
@@ -41,30 +41,30 @@ function Users() {
       await axios.patch('/api/auth/users/role', { userId, roleName })
       fetchUsers()
     } catch (err) {
-      alert('Gabim gjate ndryshimit te rolit')
+      alert('Error changing role')
     }
   }
 
-  if (loading) return <div className="page-header"><p>Duke u ngarkuar...</p></div>
+  if (loading) return <div className="page-header"><p>Loading...</p></div>
   if (error) return <div className="page-header"><p style={{color:'#dc2626'}}>{error}</p></div>
 
   return (
     <div>
       <div className="page-header">
         <h1>Users</h1>
-        <p>Menaxhimi i perdoruesve.</p>
+        <p>User Management</p>
       </div>
       <div className="table-box">
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Emri</th>
-              <th>Mbiemri</th>
+              <th>First Name</th>
+              <th>Last Name</th>
               <th>Email</th>
-              <th>Aktiv</th>
-              <th>Roli</th>
-              <th>Veprimet</th>
+              <th>Active</th>
+              <th>Role</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
