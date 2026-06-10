@@ -73,6 +73,8 @@ function CreateForm() {
   };
 
   const hasOptions = (type) => ['multiple_choice', 'checkboxes', 'dropdown'].includes(type);
+  const isFileUpload = (type) => type === 'file_upload';
+  const isPhotoUpload = (type) => type === 'photo_upload';
 
   return (
     <div className="builder">
@@ -97,6 +99,8 @@ function CreateForm() {
               <option value="dropdown">Dropdown</option>
               <option value="date">Date</option>
               <option value="time">Time</option>
+              <option value="file_upload">📎 File Upload</option>
+              <option value="photo_upload">🖼 Photo Upload</option>
             </select>
           </div>
 
@@ -116,6 +120,42 @@ function CreateForm() {
                 style={{ color: '#6d28d9', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}>
                 + Add option
               </button>
+            </div>
+          )}
+
+          {isFileUpload(q.type) && (
+            <div style={{ marginTop: '10px' }}>
+              <label style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: '20px', background: '#f9fafb', borderRadius: '6px',
+                border: '1px dashed #d1d5db', textAlign: 'center', cursor: 'pointer'
+              }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#f9fafb'}
+              >
+                <span style={{ fontSize: '28px', marginBottom: '6px' }}>📎</span>
+                <span style={{ fontSize: '13px', color: '#6b7280' }}>Kliko për të ngarkuar file</span>
+                <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>PDF, Word, Excel, CV etj.</span>
+                <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" style={{ display: 'none' }} />
+              </label>
+            </div>
+          )}
+
+          {isPhotoUpload(q.type) && (
+            <div style={{ marginTop: '10px' }}>
+              <label style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: '20px', background: '#f9fafb', borderRadius: '6px',
+                border: '1px dashed #d1d5db', textAlign: 'center', cursor: 'pointer'
+              }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#f9fafb'}
+              >
+                <span style={{ fontSize: '28px', marginBottom: '6px' }}>🖼</span>
+                <span style={{ fontSize: '13px', color: '#6b7280' }}>Kliko për të ngarkuar foto</span>
+                <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>JPG, PNG, GIF, WebP etj.</span>
+                <input type="file" accept="image/*" style={{ display: 'none' }} />
+              </label>
             </div>
           )}
 
