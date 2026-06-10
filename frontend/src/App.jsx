@@ -20,15 +20,32 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Suspense fallback={<div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh'}}>Loading...</div>}>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: "100vh",
+              }}
+            >
+              Loading...
+            </div>
+          }
+        >
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
+
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
               <Route index element={<Dashboard />} />
               <Route path="forms" element={<Forms />} />
               <Route path="sheets" element={<Sheets />} />

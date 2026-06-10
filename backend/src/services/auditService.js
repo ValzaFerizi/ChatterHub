@@ -1,7 +1,11 @@
 const { createLog, getAllLogs, getLogsByUser } = require('../repositories/auditRepository');
 
-const logAction = (userId, action, entity, entityId, oldValue, newValue, ipAddress) => {
-  return createLog(userId, action, entity, entityId, oldValue, newValue, ipAddress);
+const logAction = async (userId, action, entity, entityId, oldValue, newValue, ipAddress) => {
+  try {
+    return await createLog(userId, action, entity, entityId, oldValue, newValue, ipAddress);
+  } catch (err) {
+    console.warn('⚠️ Audit log failed:', err.message);
+  }
 };
 
 const getLogs = () => {
