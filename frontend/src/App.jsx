@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import Layout from "./components/layout";
 
 const Dashboard = lazy(() => import("./pages/dashboard"));
@@ -20,43 +21,29 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Suspense
-          fallback={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: "100vh",
-              }}
-            >
-              Loading...
-            </div>
-          }
-        >
+        <Suspense fallback={
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+            Loading...
+          </div>
+        }>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              }
-            >
+            <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="forms" element={<Forms />} />
+              <Route path="forms/:id" element={<FormDetail />} />
               <Route path="sheets" element={<Sheets />} />
               <Route path="create-form" element={<CreateForm />} />
-              <Route path="users" element={<Users />} />
-              <Route path="responses" element={<Responses />} />
-              <Route path="audit" element={<AuditLogs />} />
-              <Route path="audit-logs" element={<AuditLogs />} />
-              <Route path="forms/:id" element={<FormDetail />} />
               <Route path="search" element={<Search />} />
+              <Route path="users" element={<AdminRoute><Users /></AdminRoute>} />
+              <Route path="audit" element={<AdminRoute><AuditLogs /></AdminRoute>} />
+              <Route path="audit-logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
+              <Route path="responses" element={<AdminRoute><Responses /></AdminRoute>} />
             </Route>
+
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Suspense>
       </AuthProvider>

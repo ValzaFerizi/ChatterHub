@@ -1,8 +1,12 @@
 ﻿import { useState, useEffect } from "react";
 import api from "../api/api";
+import { useAuth } from "../context/AuthContext";
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 function Dashboard() {
+  const { user } = useAuth();
+  const isAdmin = user?.isAdmin;
+
   const [stats, setStats] = useState({ forms: 0, responses: 0, users: 0 });
   const [activity, setActivity] = useState([]);
   const [formsChartData, setFormsChartData] = useState([]);
@@ -10,31 +14,35 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
+    const requests = [
       api.get("/forms").catch(() => ({ data: [] })),
       api.get("/audit").catch(() => ({ data: [] })),
-      api.get("/auth/users").catch(() => ({ data: [] })),
-    ]).then(([formsRes, auditRes, usersRes]) => {
+      isAdmin
+        ? api.get("/auth/users").catch(() => ({ data: [] }))
+        : Promise.resolve({ data: [] }),
+    ];
+
+    Promise.all(requests).then(([formsRes, auditRes, usersRes]) => {
       const forms = formsRes.data.data || formsRes.data.forms || formsRes.data || [];
       const users = Array.isArray(usersRes.data) ? usersRes.data : [];
       const logs = Array.isArray(auditRes.data) ? auditRes.data : [];
-      const totalResponses = forms.reduce((sum, form) => sum + (form.responses?.length || 0), 0);
+      const totalResponses = forms.reduce((sum, f) => sum + (f.responses?.length || 0), 0);
 
       setStats({ forms: forms.length, responses: totalResponses, users: users.length });
       setActivity(logs.slice(0, 5));
       setFormsChartData(
-        forms.slice(0, 6).map((form, index) => ({
-          name: form.title || form.name || `Form ${index + 1}`,
+        forms.slice(0, 6).map((form, i) => ({
+          name: form.title || `Form ${i + 1}`,
           responses: form.responses?.length || 0,
         }))
       );
       setOverviewChartData([
         { name: "Forms", value: forms.length },
         { name: "Responses", value: totalResponses },
-        { name: "Users", value: users.length },
+        ...(isAdmin ? [{ name: "Users", value: users.length }] : []),
       ]);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin]);
 
   const getInfo = (log) => {
     switch (log.action) {
@@ -57,7 +65,7 @@ function Dashboard() {
     <div>
       <div className="page-header">
         <h1>Dashboard</h1>
-        <p>Overview of forms, sheets, and responses.</p>
+        <p>{isAdmin ? "System overview for all users." : "Overview of your forms and responses."}</p>
       </div>
 
       <div className="stats">
@@ -69,10 +77,12 @@ function Dashboard() {
           <p>Total Responses</p>
           <h2>{loading ? "..." : stats.responses}</h2>
         </div>
-        <div className="card">
-          <p>Total Users</p>
-          <h2>{loading ? "..." : stats.users}</h2>
-        </div>
+        {isAdmin && (
+          <div className="card">
+            <p>Total Users</p>
+            <h2>{loading ? "..." : stats.users}</h2>
+          </div>
+        )}
         <div className="card">
           <p>Status</p>
           <h2>🟢</h2>

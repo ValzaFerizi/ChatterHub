@@ -1,21 +1,16 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import axios from 'axios'
 
+axios.defaults.baseURL = 'http://localhost:5000'
+
 const AuthContext = createContext(null)
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      fetchProfile()
-    } else {
-      setLoading(false)
-    }
-  }, [])
 
   const fetchProfile = async () => {
     try {
@@ -29,6 +24,18 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchProfile()
+    } else {
+      setLoading(false)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const login = async (email, password) => {
     const res = await axios.post('/api/auth/login', { email, password })
@@ -48,8 +55,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await axios.post('/api/auth/logout')
-    } catch {
-    } finally {
+    } catch { /* ignore */ } finally {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       delete axios.defaults.headers.common['Authorization']
@@ -63,5 +69,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   )
 }
-
-export const useAuth = () => useContext(AuthContext)
