@@ -23,7 +23,7 @@ function Sheets() {
   useEffect(() => {
   if (!selectedForm) return;
   let cancelled = false;
-  api.get(`/forms/${selectedForm.id}/responses`)
+  api.get(`/responses/forms/${selectedForm.id}/responses`)
     .then(res => { if (!cancelled) setResponses(res.data.data || []); })
     .catch(() => { if (!cancelled) setResponses([]); });
   return () => { cancelled = true; };
