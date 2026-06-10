@@ -20,7 +20,11 @@ const Question       = require('./Question');
 const QuestionOption = require('./QuestionOption');
 const Response       = require('./Response');
 const ResponseAnswer = require('./ResponseAnswer');
-const Sheet = require('./Sheet')
+const Sheet = require('./Sheet');
+const FormCollaborator = require('./FormCollaborator');
+const Tag = require('./Tag');
+const FormTag = require('./FormTag');
+
 
 User.belongsToMany(Role, { through: UserRole, foreignKey: 'user_id', as: 'roles' });
 Role.belongsToMany(User, { through: UserRole, foreignKey: 'role_id', as: 'users' });
@@ -53,8 +57,12 @@ PasswordResetToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 User.hasMany(UserSession, { foreignKey: 'user_id', as: 'userSessions', onDelete: 'CASCADE' });
 UserSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Form.belongsTo(User, { foreignKey: 'ownerId', as: 'owner' });
-Form.hasOne(Sheet, { foreignKey: 'formId', as: 'sheet', onDelete: 'CASCADE' })
-Sheet.belongsTo(Form, { foreignKey: 'formId', as: 'form' })
+Form.hasOne(Sheet, { foreignKey: 'formId', as: 'sheet', onDelete: 'CASCADE' });
+Sheet.belongsTo(Form, { foreignKey: 'formId', as: 'form' });
+Form.hasMany(FormCollaborator, { foreignKey: 'formId', as: 'collaborators', onDelete: 'CASCADE' });
+FormCollaborator.belongsTo(Form, { foreignKey: 'formId', as: 'form' });
+Form.belongsToMany(Tag, { through: FormTag, foreignKey: 'formId', as: 'tags' });
+Tag.belongsToMany(Form, { through: FormTag, foreignKey: 'tagId', as: 'forms' });
 
 module.exports = {
   sequelize,
@@ -62,9 +70,8 @@ module.exports = {
   RefreshToken, Notification, Settings, Files,
   Form, Section, Question, QuestionOption,
   Response, ResponseAnswer,
-
-  PasswordResetToken, LoginAttempt, UserSession,
-  Sheet
+  Sheet,
+  FormCollaborator, Tag, FormTag  // SHTO KETO
 };
 
 
