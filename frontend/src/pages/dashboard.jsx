@@ -22,26 +22,40 @@ function Dashboard() {
         : Promise.resolve({ data: [] }),
     ];
 
-    Promise.all(requests).then(([formsRes, auditRes, usersRes]) => {
-      const forms = formsRes.data.data || formsRes.data.forms || formsRes.data || [];
-      const users = Array.isArray(usersRes.data) ? usersRes.data : [];
-      const logs = Array.isArray(auditRes.data) ? auditRes.data : [];
-      const totalResponses = forms.reduce((sum, f) => sum + (f.responses?.length || 0), 0);
+    Promise.all(requests)
+      .then(async ([formsRes, auditRes, usersRes]) => {
+        const forms = formsRes.data.data || formsRes.data.forms || formsRes.data || [];
+        const users = Array.isArray(usersRes.data) ? usersRes.data : [];
+        const logs = Array.isArray(auditRes.data) ? auditRes.data : [];
 
-      setStats({ forms: forms.length, responses: totalResponses, users: users.length });
-      setActivity(logs.slice(0, 5));
-      setFormsChartData(
-        forms.slice(0, 6).map((form, i) => ({
-          name: form.title || `Form ${i + 1}`,
-          responses: form.responses?.length || 0,
-        }))
-      );
-      setOverviewChartData([
-        { name: "Forms", value: forms.length },
-        { name: "Responses", value: totalResponses },
-        ...(isAdmin ? [{ name: "Users", value: users.length }] : []),
-      ]);
-    }).finally(() => setLoading(false));
+        const formsWithCount = await Promise.all(
+          forms.map(async (form) => {
+            try {
+              const r = await api.get(`/responses/forms/${form.id}/responses`);
+              return { ...form, responseCount: (r.data.data || []).length };
+            } catch {
+              return { ...form, responseCount: 0 };
+            }
+          })
+        );
+
+        const totalResponses = formsWithCount.reduce((sum, f) => sum + f.responseCount, 0);
+
+        setStats({ forms: forms.length, responses: totalResponses, users: users.length });
+        setActivity(logs.slice(0, 5));
+        setFormsChartData(
+          formsWithCount.slice(0, 6).map((form, i) => ({
+            name: form.title || `Form ${i + 1}`,
+            responses: form.responseCount,
+          }))
+        );
+        setOverviewChartData([
+          { name: "Forms", value: forms.length },
+          { name: "Responses", value: totalResponses },
+          ...(isAdmin ? [{ name: "Users", value: users.length }] : []),
+        ]);
+      })
+      .finally(() => setLoading(false));
   }, [isAdmin]);
 
   const getInfo = (log) => {
