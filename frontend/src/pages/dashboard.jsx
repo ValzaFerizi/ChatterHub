@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import api from "../api/api";
 import {
   BarChart,
@@ -65,44 +65,44 @@ function Dashboard() {
   const getActivityMessage = (log) => {
     switch (log.action) {
       case "LOGIN":
-        return { icon: "🔐", message: "A user logged in" };
+        return { icon: "­ƒöÉ", message: "A user logged in" };
       case "REGISTER":
-        return { icon: "👤", message: "A new user registered" };
+        return { icon: "­ƒæñ", message: "A new user registered" };
       case "LOGOUT":
-        return { icon: "🚪", message: "A user logged out" };
+        return { icon: "­ƒÜ¬", message: "A user logged out" };
       case "CREATE_FORM":
-        return { icon: "📝", message: `New form created: "${log.new_value}"` };
+        return { icon: "­ƒôØ", message: `New form created: "${log.new_value}"` };
       case "UPDATE_FORM":
-        return { icon: "✏️", message: `Form updated: "${log.new_value}"` };
+        return { icon: "Ô£Å´©Å", message: `Form updated: "${log.new_value}"` };
       case "DELETE_FORM":
-        return { icon: "🗑️", message: `Form deleted: "${log.old_value}"` };
+        return { icon: "­ƒùæ´©Å", message: `Form deleted: "${log.old_value}"` };
       case "SUBMIT_FORM":
-        return { icon: "✅", message: "Someone submitted a form" };
+        return { icon: "Ô£à", message: "Someone submitted a form" };
       case "CREATE_QUESTION":
-        return { icon: "❓", message: "New question added" };
+        return { icon: "ÔØô", message: "New question added" };
       case "DELETE_QUESTION":
-        return { icon: "❌", message: "Question deleted" };
+        return { icon: "ÔØî", message: "Question deleted" };
       case "UPDATE_ROLE":
-        return { icon: "👑", message: "User role updated" };
+        return { icon: "­ƒææ", message: "User role updated" };
       case "DEACTIVATE_USER":
-        return { icon: "🚫", message: "A user was deactivated" };
+        return { icon: "­ƒÜ½", message: "A user was deactivated" };
       default:
-        return { icon: "📌", message: log.action };
+        return { icon: "­ƒôî", message: log.action };
 =======
   const getInfo = (log) => {
     switch (log.action) {
-      case 'LOGIN':           return { icon: '🔐', message: 'A user logged in' };
-      case 'REGISTER':        return { icon: '👤', message: 'A new user registered' };
-      case 'LOGOUT':          return { icon: '🚪', message: 'A user logged out' };
-      case 'CREATE_FORM':     return { icon: '📝', message: `New form created: "${log.new_value}"` };
-      case 'UPDATE_FORM':     return { icon: '✏️', message: `Form updated: "${log.new_value}"` };
-      case 'DELETE_FORM':     return { icon: '🗑️', message: `Form deleted: "${log.old_value}"` };
-      case 'SUBMIT_FORM':     return { icon: '✅', message: 'Someone submitted a form' };
-      case 'CREATE_QUESTION': return { icon: '❓', message: 'New question added' };
-      case 'DELETE_QUESTION': return { icon: '❌', message: 'Question deleted' };
-      case 'UPDATE_ROLE':     return { icon: '👑', message: 'User role updated' };
-      case 'DEACTIVATE_USER': return { icon: '🚫', message: 'A user was deactivated' };
-      default:                return { icon: '📌', message: log.action };
+      case 'LOGIN':           return { icon: '­ƒöÉ', message: 'A user logged in' };
+      case 'REGISTER':        return { icon: '­ƒæñ', message: 'A new user registered' };
+      case 'LOGOUT':          return { icon: '­ƒÜ¬', message: 'A user logged out' };
+      case 'CREATE_FORM':     return { icon: '­ƒôØ', message: `New form created: "${log.new_value}"` };
+      case 'UPDATE_FORM':     return { icon: 'Ô£Å´©Å', message: `Form updated: "${log.new_value}"` };
+      case 'DELETE_FORM':     return { icon: '­ƒùæ´©Å', message: `Form deleted: "${log.old_value}"` };
+      case 'SUBMIT_FORM':     return { icon: 'Ô£à', message: 'Someone submitted a form' };
+      case 'CREATE_QUESTION': return { icon: 'ÔØô', message: 'New question added' };
+      case 'DELETE_QUESTION': return { icon: 'ÔØî', message: 'Question deleted' };
+      case 'UPDATE_ROLE':     return { icon: '­ƒææ', message: 'User role updated' };
+      case 'DEACTIVATE_USER': return { icon: '­ƒÜ½', message: 'A user was deactivated' };
+      default:                return { icon: '­ƒôî', message: log.action };
 >>>>>>> 277975d0b37baa6c189be2cc1cc32d88ec63ec48
     }
   };
@@ -132,7 +132,7 @@ function Dashboard() {
 
         <div className="card">
           <p>Status</p>
-          <h2>🟢</h2>
+          <h2>­ƒƒó</h2>
         </div>
       </div>
 
@@ -229,7 +229,7 @@ function Dashboard() {
                     marginLeft: "8px",
                   }}
                 >
-                  —{" "}
+                  ÔÇö{" "}
                   {log.created_at
                     ? new Date(log.created_at).toLocaleString()
                     : "No date"}
