@@ -1,21 +1,13 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-async function connectMongo() {
+const connectMongo = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI;
-
-    if (!mongoUri) {
-      console.log('MongoDB URI not provided. Skipping MongoDB connection.');
-      return;
-    }
-
-    await mongoose.connect(mongoUri);
-
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/chatterhub');
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
+    console.warn('⚠️ MongoDB nuk është aktiv — vazhdon pa të:', error.message);
   }
-}
+};
 
 module.exports = connectMongo;
