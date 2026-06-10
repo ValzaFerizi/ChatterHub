@@ -12,7 +12,7 @@ function AuditLogs() {
         const res = await axios.get('/api/audit')
         setLogs(res.data)
       } catch (err) {
-        setError('Nuk u ngarkuan audit logs')
+        setError('Failed to load audit logs')
       } finally {
         setLoading(false)
       }
@@ -20,23 +20,23 @@ function AuditLogs() {
     fetchLogs()
   }, [])
 
-  if (loading) return <div className="page-header"><p>Duke u ngarkuar...</p></div>
+  if (loading) return <div className="page-header"><p>Loading...</p></div>
   if (error) return <div className="page-header"><p style={{color:'#dc2626'}}>{error}</p></div>
 
   return (
     <div>
       <div className="page-header">
         <h1>Audit Logs</h1>
-        <p>Regjistri i te gjitha veprimeve.</p>
+        <p>Logs of all actions</p>
       </div>
       <div className="table-box">
         <table>
           <thead>
             <tr>
               <th>User ID</th>
-              <th>Emri</th>
-              <th>Veprimi</th>
-              <th>Entiteti</th>
+              <th>First Name</th>
+              <th>Action</th>
+              <th>Entity</th>
               <th>IP</th>
               <th>Data</th>
             </tr>
