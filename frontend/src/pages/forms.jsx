@@ -15,11 +15,24 @@ function Forms() {
   const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
-    api.get("/forms")
-      .then(res => setForms(res.data.data || res.data.forms || res.data || []))
-      .catch(() => setForms([]))
-      .finally(() => setLoadingForms(false));
-  }, []);
+  api.get("/forms")
+    .then(async res => {
+      const data = res.data.data || res.data.forms || res.data || [];
+      const formsWithCount = await Promise.all(
+        data.map(async (form) => {
+          try {
+            const r = await api.get(`/responses/forms/${form.id}/responses`);
+            return { ...form, responseCount: (r.data.data || []).length };
+          } catch {
+            return { ...form, responseCount: 0 };
+          }
+        })
+      );
+      setForms(formsWithCount);
+    })
+    .catch(() => setForms([]))
+    .finally(() => setLoadingForms(false));
+}, []);
 
   const handleDelete = async (formId) => {
     if (!window.confirm("A je i sigurt që dëshiron ta fshish këtë formë?")) return;
@@ -89,7 +102,7 @@ function Forms() {
               <h2>{form.title}</h2>
               <p>{form.description}</p>
               <div className="meta">
-                <span>{form.responses?.length || 0} responses</span>
+                <span>{form.responseCount || 0} responses</span>
                 <span>{new Date(form.createdAt || form.created_at).toLocaleDateString()}</span>
               </div>
               <div style={{ display: "flex", gap: "8px", marginTop: "8px", alignItems: "center", flexWrap: "wrap" }}>
