@@ -21,6 +21,21 @@ services:
       - mongodb
       - redis
     restart: unless-stopped
+    
+    # MySQL
+  mysql:
+    image: mysql:8
+    container_name: chatterhub_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: chatterhub_db
+      MYSQL_USER: chatterhub_user
+      MYSQL_PASSWORD: chatterhub_pass123
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
 
   # PostgreSQL
   postgres:
@@ -63,3 +78,4 @@ volumes:
   postgres_data:
   mongodb_data:
   redis_data:
+  mysql_data:
