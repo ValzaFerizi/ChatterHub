@@ -93,6 +93,28 @@ const FormRepository = {
 
     await form.destroy();
     return true;
+  },
+
+  async publishForm(formId) {
+    const form = await Form.findByPk(formId);
+
+    if (!form) {
+      return null;
+    }
+
+    await form.update({ isPublished: true });
+    return form;
+  },
+
+  async unpublishForm(formId) {
+    const form = await Form.findByPk(formId);
+
+    if (!form) {
+      return null;
+    }
+
+    await form.update({ isPublished: false });
+    return form;
   }
 };
 
