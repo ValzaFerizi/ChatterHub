@@ -61,6 +61,7 @@ function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+<<<<<<< HEAD
   const getActivityMessage = (log) => {
     switch (log.action) {
       case "LOGIN":
@@ -87,6 +88,22 @@ function Dashboard() {
         return { icon: "🚫", message: "A user was deactivated" };
       default:
         return { icon: "📌", message: log.action };
+=======
+  const getInfo = (log) => {
+    switch (log.action) {
+      case 'LOGIN':           return { icon: '🔐', message: 'A user logged in' };
+      case 'REGISTER':        return { icon: '👤', message: 'A new user registered' };
+      case 'LOGOUT':          return { icon: '🚪', message: 'A user logged out' };
+      case 'CREATE_FORM':     return { icon: '📝', message: `New form created: "${log.new_value}"` };
+      case 'UPDATE_FORM':     return { icon: '✏️', message: `Form updated: "${log.new_value}"` };
+      case 'DELETE_FORM':     return { icon: '🗑️', message: `Form deleted: "${log.old_value}"` };
+      case 'SUBMIT_FORM':     return { icon: '✅', message: 'Someone submitted a form' };
+      case 'CREATE_QUESTION': return { icon: '❓', message: 'New question added' };
+      case 'DELETE_QUESTION': return { icon: '❌', message: 'Question deleted' };
+      case 'UPDATE_ROLE':     return { icon: '👑', message: 'User role updated' };
+      case 'DEACTIVATE_USER': return { icon: '🚫', message: 'A user was deactivated' };
+      default:                return { icon: '📌', message: log.action };
+>>>>>>> 277975d0b37baa6c189be2cc1cc32d88ec63ec48
     }
   };
 
@@ -188,8 +205,12 @@ function Dashboard() {
           <p style={{ color: "#6b7280", fontSize: "14px" }}>No activity yet.</p>
         ) : (
           activity.map((log, i) => {
+<<<<<<< HEAD
             const { icon, message } = getActivityMessage(log);
 
+=======
+            const { icon, message } = getInfo(log);
+>>>>>>> 277975d0b37baa6c189be2cc1cc32d88ec63ec48
             return (
               <p
                 key={i}

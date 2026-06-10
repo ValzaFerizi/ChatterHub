@@ -1,104 +1,125 @@
-import { useState } from "react";
-import axios from "axios";
-import ExportProgress from "../components/ExportProgress";
-
-const API_URL = "http://localhost:5000/api";
+import { useState, useEffect } from "react";
+import api from "../api/api";
+import { useSocket } from "../hooks/useSocket";
 
 function Sheets() {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [progress, setProgress] = useState(0);
+  const [forms, setForms] = useState([]);
+  const [selectedForm, setSelectedForm] = useState(null);
+  const [responses, setResponses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const socketRef = useSocket();
 
-  const sheets = [
-    { id: "1", name: "Customer Feedback Responses", linkedForm: "Customer Feedback Form", rows: 24, columns: 6, updatedAt: "2026-06-03" },
-    { id: "2", name: "Job Applications", linkedForm: "Job Application Form", rows: 12, columns: 8, updatedAt: "2026-06-02" },
-  ];
+  useEffect(() => {
+    api.get("/forms")
+      .then(res => {
+        const data = res.data.data || res.data.forms || res.data || [];
+        setForms(data);
+        if (data.length > 0) setSelectedForm(data[0]);
+      })
+      .catch(() => setForms([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const handleExport = async (format) => {
-    try {
-      setLoading(true);
-      setMessage("");
-      setProgress(0);
+  useEffect(() => {
+  if (!selectedForm) return;
+  let cancelled = false;
+  api.get(`/responses/forms/${selectedForm.id}/responses`)
+    .then(res => { if (!cancelled) setResponses(res.data.data || []); })
+    .catch(() => { if (!cancelled) setResponses([]); });
+  return () => { cancelled = true; };
+}, [selectedForm]);
 
-      const response = await axios.post(
-        `${API_URL}/export/${format}`,
-        format === "csv"
-          ? { data: sheets, fields: ["id", "name", "linkedForm", "rows", "columns", "updatedAt"] }
-          : { data: sheets },
-        {
-          responseType: "blob",
-          onDownloadProgress: (e) => {
-            const percent = Math.round((e.loaded * 100) / (e.total || 1));
-            setProgress(percent);
-          },
-        }
-      );
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket || !selectedForm) return;
+    socket.emit("sheet:join", { sheetId: selectedForm.id });
+    socket.on("cell:updated", ({ cellId, value, updatedBy }) => {
+      console.log(`Cell ${cellId} u ndryshua nga ${updatedBy}: ${value}`);
+    });
+    return () => socket.emit("sheet:leave", { sheetId: selectedForm.id });
+  }, [socketRef, selectedForm]);
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `sheets-export.${format === "excel" ? "xlsx" : format}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      setProgress(100);
-      setMessage(`✅ Sheets u eksportuan si ${format.toUpperCase()}!`);
-    } catch (err) {
-      setMessage(`❌ Export dështoi: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
+  const getColumns = () => {
+    if (!responses?.length) return [];
+    const allKeys = new Set();
+    responses.forEach(r => {
+      r.answers?.forEach(a => {
+        if (a.question?.text) allKeys.add(a.question.text);
+      });
+    });
+    return Array.from(allKeys);
   };
+
+  const getAnswer = (response, questionText) => {
+    const answer = response.answers?.find(a => a.question?.text === questionText);
+    if (!answer) return "—";
+    return answer.valueText || answer.valueNumber || JSON.stringify(answer.valueJson) || "—";
+  };
+
+  const columns = getColumns();
 
   return (
     <div>
-      <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1>Sheets</h1>
-          <p>Response tables connected to forms.</p>
-        </div>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => handleExport("csv")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#4CAF50", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export CSV"}
-          </button>
-          <button onClick={() => handleExport("excel")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#2196F3", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export Excel"}
-          </button>
-          <button onClick={() => handleExport("json")} disabled={loading}
-            style={{ padding: "8px 16px", backgroundColor: "#FF9800", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer" }}>
-            {loading ? "..." : "Export JSON"}
-          </button>
-        </div>
+      <div className="page-header">
+        <h1>Sheets</h1>
+        <p>Përgjigjet e formave në kohë reale.</p>
       </div>
 
-      <ExportProgress loading={loading} message={message} progress={progress} />
+      {!loading && forms.length > 0 && (
+        <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
+          {forms.map(form => (
+            <button
+              key={form.id}
+              onClick={() => setSelectedForm(form)}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "1.5px solid",
+                borderColor: selectedForm?.id === form.id ? "#6d28d9" : "#e5e7eb",
+                background: selectedForm?.id === form.id ? "#6d28d9" : "#fff",
+                color: selectedForm?.id === form.id ? "#fff" : "#374151",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: 500
+              }}
+            >
+              {form.title}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Sheet Name</th>
-              <th>Linked Form</th>
-              <th>Rows</th>
-              <th>Columns</th>
-              <th>Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sheets.map((sheet) => (
-              <tr key={sheet.id}>
-                <td>{sheet.name}</td>
-                <td>{sheet.linkedForm}</td>
-                <td>{sheet.rows}</td>
-                <td>{sheet.columns}</td>
-                <td>{sheet.updatedAt}</td>
+        {loading ? (
+          <p style={{ padding: "20px", color: "#6b7280" }}>Duke ngarkuar format...</p>
+        ) : forms.length === 0 ? (
+          <p style={{ padding: "20px", color: "#6b7280" }}>Nuk ka forma akoma.</p>
+        ) : responses.length === 0 ? (
+          <p style={{ padding: "20px", color: "#6b7280" }}>
+            Nuk ka përgjigje akoma për <strong>{selectedForm?.title}</strong>.
+          </p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Submitted At</th>
+                {columns.map((col, i) => <th key={i}>{col}</th>)}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {responses.map((response, i) => (
+                <tr key={response.id}>
+                  <td>{i + 1}</td>
+                  <td>{new Date(response.submittedAt || response.created_at).toLocaleString()}</td>
+                  {columns.map((col, j) => (
+                    <td key={j}>{getAnswer(response, col)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
