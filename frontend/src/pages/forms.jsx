@@ -16,6 +16,10 @@ function Forms() {
   const [progress, setProgress] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [openImportDropdown, setOpenImportDropdown] = useState(false);
+  const [editingForm, setEditingForm] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editQuestions, setEditQuestions] = useState([]);
 
   useEffect(() => {
     api.get("/forms")
@@ -80,6 +84,23 @@ function Forms() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const canEdit = (form) => {
+    if (user?.isAdmin) return true;
+    if (!form.ownerId) return false;
+    return Number(form.ownerId) === Number(user?.id);
+  };
+
+  const handleEdit = async () => {
+    try {
+      await api.put(`/forms/${editingForm.id}`, { title: editTitle, description: editDescription });
+      await Promise.all(editQuestions.map(q =>
+        api.put(`/questions/${q.id}`, { label: q.label }).catch(() => null)
+      ));
+      setForms(prev => prev.map(f => f.id === editingForm.id ? { ...f, title: editTitle, description: editDescription } : f));
+      setEditingForm(null);
+    } catch (err) { alert('Error: ' + err.message); }
   };
 
   const canDelete = (form) => {
@@ -164,7 +185,7 @@ function Forms() {
                 <span>{form.responseCount || 0} responses</span>
                 <span>{new Date(form.createdAt || form.created_at).toLocaleDateString()}</span>
               </div>
-              <div style={{ display: "flex", gap: "8px", marginTop: "8px", alignItems: "center", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "8px", marginTop: "8px", alignItems: "center", flexWrap: "nowrap" }}>
 
                 <Link
                   to={`/forms/${form.id}`}
@@ -172,6 +193,24 @@ function Forms() {
                 >
                   Open
                 </Link>
+
+                {canEdit(form) && (
+                  <button
+                    onClick={async () => {
+                      setEditingForm(form);
+                      setEditTitle(form.title);
+                      setEditDescription(form.description || '');
+                      try {
+                        const res = await api.get(`/forms/${form.id}`);
+                        const formData = res.data.data || res.data;
+                        setEditQuestions(formData.questions || []);
+                      } catch { setEditQuestions([]); }
+                    }}
+                    style={{ padding: "6px 12px", background: "#f3f4f6", color: "#374151", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}
+                  >
+                    ✏️ Edit
+                  </button>
+                )}
 
                 <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
                   <button
@@ -208,6 +247,44 @@ function Forms() {
             </div>
           ))
         )}
+      </div>
+      <EditModal editingForm={editingForm} editTitle={editTitle} setEditTitle={setEditTitle} editDescription={editDescription} setEditDescription={setEditDescription} editQuestions={editQuestions} setEditQuestions={setEditQuestions} handleEdit={handleEdit} onClose={() => setEditingForm(null)} />
+    </div>
+  );
+}
+
+function EditModal({ editingForm, editTitle, setEditTitle, editDescription, setEditDescription, editQuestions, setEditQuestions, handleEdit, onClose }) {
+  if (!editingForm) return null;
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', width: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
+        <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Edit Form</h2>
+        <label style={{ display: 'block', fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>Title</label>
+        <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+          style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', marginBottom: '12px', boxSizing: 'border-box' }} />
+        <label style={{ display: 'block', fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>Description</label>
+        <textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={2}
+          style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px', marginBottom: '16px', boxSizing: 'border-box', resize: 'vertical' }} />
+        {editQuestions.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <p style={{ fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Questions</p>
+            {editQuestions.map((q, i) => (
+              <div key={q.id} style={{ marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>{i+1}. {q.type}</label>
+                <input value={q.label} onChange={(e) => {
+                    const updated = [...editQuestions];
+                    updated[i] = { ...updated[i], label: e.target.value };
+                    setEditQuestions(updated);
+                  }}
+                  style={{ width: '100%', padding: '7px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} style={{ padding: '8px 16px', background: '#f3f4f6', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Cancel</button>
+          <button onClick={handleEdit} style={{ padding: '8px 16px', background: '#6d28d9', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Save</button>
+        </div>
       </div>
     </div>
   );
