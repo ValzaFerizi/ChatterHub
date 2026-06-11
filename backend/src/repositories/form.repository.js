@@ -16,7 +16,6 @@ const FormRepository = {
         order_index: q.order_index || 0
       });
       
-      // Ruaj options nëse ka
       if (q.options && q.options.length > 0) {
         await Promise.all(q.options.map((opt, i) =>
           QuestionOption.create({
@@ -38,6 +37,12 @@ const FormRepository = {
       where: { ownerId },
       order: [['createdAt', 'DESC']]
     });
+  },
+
+  async findAll() {
+  return Form.findAll({
+    order: [['createdAt', 'DESC']]
+  });
   },
 
   async findFormById(formId) {

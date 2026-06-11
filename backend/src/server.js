@@ -43,7 +43,8 @@ app.use('/api/sections',    sectionRoutes);
 app.use('/api/questions',   questionRoutes);
 app.use('/api/responses',   responseRoutes);
 
-initSocket(server);
+const io = initSocket(server);
+app.set('io', io);
 connectMongo();
 
 const { sequelize } = require('./models');

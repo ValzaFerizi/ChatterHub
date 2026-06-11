@@ -28,12 +28,14 @@ const login = async (email, password, ipAddress) => {
   const isMatch = await bcrypt.compare(password, user.password_hash);
   if (!isMatch) throw new Error('Invalid credentials');
 
-  const accessToken = jwt.sign(
-    { id: user.id, email: user.email },
-    process.env.JWT_SECRET,
-    { expiresIn: '15m' }
-  );
+  const roles = user.roles ? user.roles.map(r => r.name) : [];
+const isAdmin = roles.includes('admin');
 
+const accessToken = jwt.sign(
+  { id: user.id, email: user.email, roles, isAdmin },
+  process.env.JWT_SECRET,
+  { expiresIn: '15m' }
+);
   const refreshToken = jwt.sign(
     { id: user.id },
     process.env.JWT_REFRESH_SECRET,

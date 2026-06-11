@@ -2,28 +2,40 @@ const ResponseRepository = require('../repositories/response.repository');
 
 const ResponseController = {
   async submitResponse(req, res) {
-    try {
-      const { formId } = req.params;
-      const respondentId = req.user?.id || req.body.respondentId || null;
-      const { answers } = req.body;
+  try {
+    const { formId } = req.params;
+    const respondentId = req.user?.id || req.body.respondentId || null;
+    const { answers } = req.body;
 
-      const response = await ResponseRepository.createResponseWithAnswers(
-        formId,
-        respondentId,
-        answers
-      );
+    const response = await ResponseRepository.createResponseWithAnswers(
+      formId,
+      respondentId,
+      answers
+    );
 
-      return res.status(201).json({
-        message: 'Response submitted successfully',
-        data: response
-      });
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Failed to submit response',
-        error: error.message
+    const io = req.app.get('io');
+    if (io) {
+      const userName = req.user
+        ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim()
+        : 'Dikush';
+      io.emit('notification', {
+        type: 'form_submit',
+        message: `${userName} plotësoi një formë`,
+        createdAt: new Date()
       });
     }
-  },
+
+    return res.status(201).json({
+      message: 'Response submitted successfully',
+      data: response
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to submit response',
+      error: error.message
+    });
+  }
+},
 
   async getResponsesByForm(req, res) {
     try {

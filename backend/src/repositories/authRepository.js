@@ -1,7 +1,10 @@
 const { User, Role } = require('../models');
 
 const findUserByEmail = async (email) => {
-  return await User.findOne({ where: { email } });
+  return await User.findOne({
+    where: { email },
+    include: [{ model: Role, as: 'roles', through: { attributes: [] } }]
+  });
 };
 
 const findUserById = async (id) => {

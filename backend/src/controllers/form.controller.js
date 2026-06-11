@@ -18,15 +18,13 @@ const FormController = {
   },
 
   async getForms(req, res) {
-    try {
-      const ownerId = req.user?.id || req.query.ownerId;
-      if (!ownerId) return res.status(400).json({ message: 'ownerId is required' });
-      const forms = await FormRepository.findFormsByOwner(ownerId);
-      return res.status(200).json({ message: 'Forms fetched successfully', data: forms });
-    } catch (error) {
-      return res.status(500).json({ message: 'Failed to fetch forms', error: error.message });
-    }
-  },
+  try {
+    const forms = await FormRepository.findAll();
+    return res.status(200).json({ message: 'Forms fetched successfully', data: forms });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to fetch forms', error: error.message });
+  }
+},
 
   async getFormById(req, res) {
     try {

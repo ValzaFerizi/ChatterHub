@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import api from "../api/api";
 import axios from "axios";
 import ExportProgress from "../components/ExportProgress";
+import { useAuth } from "../context/AuthContext";
 
 const API_URL = "http://localhost:5000/api";
 
 function Forms() {
+  const { user } = useAuth();
   const [forms, setForms] = useState([]);
   const [loadingForms, setLoadingForms] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -15,35 +17,34 @@ function Forms() {
   const [openDropdown, setOpenDropdown] = useState(null);
 
   useEffect(() => {
-  api.get("/forms")
-    .then(async res => {
-      const data = res.data.data || res.data.forms || res.data || [];
-      const formsWithCount = await Promise.all(
-        data.map(async (form) => {
-          try {
-            const r = await api.get(`/responses/forms/${form.id}/responses`);
-            return { ...form, responseCount: (r.data.data || []).length };
-          } catch {
-            return { ...form, responseCount: 0 };
-          }
-        })
-      );
-      setForms(formsWithCount);
-    })
-    .catch(() => setForms([]))
-    .finally(() => setLoadingForms(false));
-}, []);
+    api.get("/forms")
+      .then(async res => {
+        const data = res.data.data || res.data.forms || res.data || [];
+        const formsWithCount = await Promise.all(
+          data.map(async (form) => {
+            try {
+              const r = await api.get(`/responses/forms/${form.id}/responses`);
+              return { ...form, responseCount: (r.data.data || []).length };
+            } catch {
+              return { ...form, responseCount: 0 };
+            }
+          })
+        );
+        setForms(formsWithCount);
+      })
+      .catch(() => setForms([]))
+      .finally(() => setLoadingForms(false));
+  }, []);
 
   const handleDelete = async (formId) => {
-    if (!window.confirm("A je i sigurt që dëshiron ta fshish këtë formë?")) return;
-    try {
-      await api.delete(`/forms/${formId}`);
-      setForms(prev => prev.filter(f => f.id !== formId));
-    } catch (err) {
-      alert("Gabim gjatë fshirjes: " + (err.response?.data?.message || err.message));
-    }
-  };
-
+  if (!window.confirm("A je i sigurt që dëshiron ta fshish këtë formë?")) return;
+  try {
+    await api.delete(`/forms/${formId}`);
+    setForms(prev => prev.filter(f => Number(f.id) !== Number(formId)));
+  } catch (err) {
+    alert("Gabim gjatë fshirjes: " + (err.response?.data?.message || err.message));
+  }
+};
   const handleExport = async (format) => {
     try {
       setLoading(true);
@@ -79,6 +80,12 @@ function Forms() {
     }
   };
 
+  const canDelete = (form) => {
+  if (user?.isAdmin) return true;
+  if (!form.ownerId) return false;
+  return Number(form.ownerId) === Number(user?.id);
+};
+
   return (
     <div onClick={() => setOpenDropdown(null)}>
       <div className="page-top">
@@ -106,8 +113,7 @@ function Forms() {
                 <span>{new Date(form.createdAt || form.created_at).toLocaleDateString()}</span>
               </div>
               <div style={{ display: "flex", gap: "8px", marginTop: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                
-                {/* Open */}
+
                 <Link
                   to={`/forms/${form.id}`}
                   style={{ padding: "6px 12px", background: "#6d28d9", color: "#fff", borderRadius: "6px", cursor: "pointer", fontSize: "13px", textDecoration: "none" }}
@@ -115,7 +121,6 @@ function Forms() {
                   Open
                 </Link>
 
-                {/* Export dropdown */}
                 <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setOpenDropdown(openDropdown === form.id ? null : form.id)}
@@ -124,35 +129,28 @@ function Forms() {
                     ⬇ Export
                   </button>
                   {openDropdown === form.id && (
-                    <div style={{
-                      position: "absolute", top: "calc(100% + 4px)", left: 0,
-                      background: "white", border: "0.5px solid #e5e7eb",
-                      borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      zIndex: 100, minWidth: "150px"
-                    }}>
-                      <button onClick={() => handleExport("csv")}
-                        style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                    <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, background: "white", border: "0.5px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 100, minWidth: "150px" }}>
+                      <button onClick={() => handleExport("csv")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📄 Export CSV
                       </button>
-                      <button onClick={() => handleExport("excel")}
-                        style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                      <button onClick={() => handleExport("excel")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📊 Export Excel
                       </button>
-                      <button onClick={() => handleExport("json")}
-                        style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                      <button onClick={() => handleExport("json")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📋 Export JSON
                       </button>
                     </div>
                   )}
                 </div>
 
-                {/* Delete */}
-                <button
-                  onClick={() => handleDelete(form.id)}
-                  style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}
-                >
-                  🗑 Delete
-                </button>
+                {canDelete(form) && (
+                  <button
+                    onClick={() => handleDelete(form.id)}
+                    style={{ padding: "6px 12px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}
+                  >
+                    🗑 Delete
+                  </button>
+                )}
 
               </div>
             </div>
