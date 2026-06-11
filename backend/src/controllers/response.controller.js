@@ -1,56 +1,56 @@
 const ResponseRepository = require('../repositories/response.repository');
+const FormRepository = require('../repositories/form.repository');
 
 const ResponseController = {
+
   async submitResponse(req, res) {
-  try {
-    const { formId } = req.params;
-    const respondentId = req.user?.id || req.body.respondentId || null;
-    const { answers } = req.body;
+    try {
+      const { formId } = req.params;
+      const respondentId = req.user?.id || req.body.respondentId || null;
+      const { answers } = req.body;
 
-    const response = await ResponseRepository.createResponseWithAnswers(
-      formId,
-      respondentId,
-      answers
-    );
+      const response = await ResponseRepository.createResponseWithAnswers(
+        formId, respondentId, answers
+      );
 
-    const io = req.app.get('io');
-    if (io) {
-      const userName = req.user
-        ? `${req.user.first_name || ''} ${req.user.last_name || ''}`.trim()
-        : 'Dikush';
-      io.emit('notification', {
-        type: 'form_submit',
-        message: `${userName} plotësoi një formë`,
-        createdAt: new Date()
+      const form = await FormRepository.findFormById(formId);
+      const formTitle = form?.title || 'një formë';
+      const userEmail = req.user?.email || 'Dikush';
+      const submitterId = Number(req.user?.id);
+
+      const io = req.app.get('io');
+      if (io) {
+        io.sockets.sockets.forEach((socket) => {
+          const u = socket.userData;
+          if (u && u.isAdmin && Number(u.id) !== submitterId) {
+            socket.emit('notification', {
+              type: 'form_submit',
+              message: `${userEmail} plotësoi formën "${formTitle}"`,
+              createdAt: new Date()
+            });
+          }
+        });
+      }
+
+      return res.status(201).json({
+        message: 'Response submitted successfully',
+        data: response
+      });
+    } catch (error) {
+      return res.status(500).json({
+        message: 'Failed to submit response',
+        error: error.message
       });
     }
-
-    return res.status(201).json({
-      message: 'Response submitted successfully',
-      data: response
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Failed to submit response',
-      error: error.message
-    });
-  }
-},
+  },
 
   async getResponsesByForm(req, res) {
     try {
       const { formId } = req.params;
       const responses = await ResponseRepository.findResponsesByForm(formId);
-
-      return res.status(200).json({
-        message: 'Responses fetched successfully',
-        data: responses
-      });
+      return res.status(200).json({ message: 'Responses fetched successfully', data: responses });
     } catch (error) {
-      return res.status(500).json({
-        message: 'Failed to fetch responses',
-        error: error.message
-      });
+      return res.status(500).json({ message: 'Failed to fetch responses', error: error.message });
     }
   },
 
@@ -58,22 +58,10 @@ const ResponseController = {
     try {
       const { responseId } = req.params;
       const response = await ResponseRepository.findResponseById(responseId);
-
-      if (!response) {
-        return res.status(404).json({
-          message: 'Response not found'
-        });
-      }
-
-      return res.status(200).json({
-        message: 'Response fetched successfully',
-        data: response
-      });
+      if (!response) return res.status(404).json({ message: 'Response not found' });
+      return res.status(200).json({ message: 'Response fetched successfully', data: response });
     } catch (error) {
-      return res.status(500).json({
-        message: 'Failed to fetch response',
-        error: error.message
-      });
+      return res.status(500).json({ message: 'Failed to fetch response', error: error.message });
     }
   },
 
@@ -81,15 +69,9 @@ const ResponseController = {
     try {
       const { responseId } = req.params;
       await ResponseRepository.deleteResponse(responseId);
-
-      return res.status(200).json({
-        message: 'Response deleted successfully'
-      });
+      return res.status(200).json({ message: 'Response deleted successfully' });
     } catch (error) {
-      return res.status(500).json({
-        message: 'Failed to delete response',
-        error: error.message
-      });
+      return res.status(500).json({ message: 'Failed to delete response', error: error.message });
     }
   }
 };

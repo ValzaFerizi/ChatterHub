@@ -75,12 +75,27 @@ const getAllUsers = async (req, res) => {
 
 const deactivateUser = async (req, res) => {
   try {
-    const { User, Role } = require("../models");
+    const { User } = require('../models');
     const { id } = req.params;
     if (parseInt(id) === req.user.id) {
       return res.status(400).json({ message: 'Nuk mund te deaktivizosh veten' });
     }
+    const targetUser = await User.findByPk(id);
     await User.update({ is_active: false }, { where: { id } });
+
+    const io = req.app.get('io');
+    if (io && targetUser) {
+      io.sockets.sockets.forEach((socket) => {
+        if (socket.userData && Number(socket.userData.id) === Number(id)) {
+          socket.emit('notification', {
+            type: 'account_deactivated',
+            message: 'Llogaria juaj u deaktivizua nga administratori.',
+            createdAt: new Date()
+          });
+        }
+      });
+    }
+
     res.status(200).json({ message: 'User u deaktivizua' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -94,6 +109,20 @@ const updateUserRole = async (req, res) => {
     const { UserRole } = require('../models');
     await UserRole.destroy({ where: { user_id: userId } });
     await assignRole(userId, roleName);
+
+    const io = req.app.get('io');
+    if (io) {
+      io.sockets.sockets.forEach((socket) => {
+        if (socket.userData && Number(socket.userData.id) === Number(userId)) {
+          socket.emit('notification', {
+            type: 'role_updated',
+            message: `Roli juaj u ndryshua në "${roleName}"`,
+            createdAt: new Date()
+          });
+        }
+      });
+    }
+
     res.status(200).json({ message: 'Roli u ndryshua' });
   } catch (error) {
     res.status(500).json({ message: error.message });

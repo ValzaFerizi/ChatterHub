@@ -15,11 +15,12 @@ const socketMiddleware = (socket, next) => {
     socket.userData = {
       id: decoded.id,
       email: decoded.email,
-      username: decoded.username || decoded.email.split('@')[0]
+      username: decoded.username || decoded.email.split('@')[0],
+      roles: decoded.roles || [],
+      isAdmin: decoded.isAdmin || false
     };
 
     next();
-
   } catch (err) {
     return next(new Error('Token i pavlefshem ose i skaduar!'));
   }
