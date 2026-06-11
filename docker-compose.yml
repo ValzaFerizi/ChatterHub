@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Node.js API
   api:
     build: .
     container_name: chatterhub_api
@@ -10,19 +9,18 @@ services:
     env_file:
       - .env
     environment:
-      - DB_NAME=chatterhub_db
-      - DB_USER=chatterhub_user
-      - DB_PASSWORD=chatterhub_pass123
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_DIALECT=postgres
+      - DB_NAME=chatterhub
+      - DB_USER=root
+      - DB_PASSWORD=root123
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DIALECT=mysql
     depends_on:
-      - postgres
+      - mysql
       - mongodb
       - redis
     restart: unless-stopped
-    
-    # MySQL
+
   mysql:
     image: mysql:8
     container_name: chatterhub_mysql
@@ -30,14 +28,13 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: chatterhub_db
+      MYSQL_DATABASE: chatterhub
       MYSQL_USER: chatterhub_user
       MYSQL_PASSWORD: chatterhub_pass123
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
 
-  # PostgreSQL
   postgres:
     image: postgres:15
     container_name: chatterhub_postgres
@@ -51,7 +48,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
-  # MongoDB
   mongodb:
     image: mongo:7
     container_name: chatterhub_mongodb
@@ -64,7 +60,6 @@ services:
       - mongodb_data:/data/db
     restart: unless-stopped
 
-  # Redis
   redis:
     image: redis:7-alpine
     container_name: chatterhub_redis
