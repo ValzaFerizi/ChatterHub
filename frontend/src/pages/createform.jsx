@@ -100,7 +100,6 @@ function CreateForm() {
               <option value="date">Date</option>
               <option value="time">Time</option>
               <option value="file_upload">📎 File Upload</option>
-              <option value="photo_upload">🖼 Photo Upload</option>
             </select>
           </div>
 

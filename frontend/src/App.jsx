@@ -16,6 +16,7 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const FormDetail = lazy(() => import("./pages/FormDetail"));
 const Search = lazy(() => import("./pages/Search"));
 const Responses = lazy(() => import("./pages/responses"));
+const CMSSettings = lazy(() => import('./pages/Settings'));
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
               <Route path="audit" element={<AdminRoute><AuditLogs /></AdminRoute>} />
               <Route path="audit-logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
               <Route path="responses" element={<AdminRoute><Responses /></AdminRoute>} />
+              <Route path="cms-settings" element={<AdminRoute><CMSSettings /></AdminRoute>} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" />} />
