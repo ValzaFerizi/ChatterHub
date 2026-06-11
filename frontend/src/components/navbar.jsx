@@ -9,7 +9,6 @@ function Navbar() {
   const socketRef = useSocket()
   const [notifications, setNotifications] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
-  const [toasts, setToasts] = useState([])
   const inputRef = useRef()
   const bellRef = useRef()
 
@@ -23,13 +22,22 @@ function Navbar() {
         { id: Date.now(), message, type, read: false, time: new Date() },
         ...prev
       ])
-      setToasts(prev => [...prev, message])
-      setTimeout(() => setToasts(prev => prev.slice(1)), 3000)
     })
     return () => socket.off('notification')
   }, [socketRef])
 
-  const handleBell = () => {
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  const handleBell = (e) => {
+    e.stopPropagation()
     setShowDropdown(prev => !prev)
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }
@@ -60,7 +68,6 @@ function Navbar() {
           </span>
         )}
 
-        {/* Bell */}
         <div ref={bellRef} style={{ position: 'relative' }}>
           <div
             style={{ position: 'relative', cursor: 'pointer', fontSize: '20px' }}
@@ -80,21 +87,32 @@ function Navbar() {
             )}
           </div>
 
-          {/* Dropdown */}
           {showDropdown && (
             <div style={{
               position: 'absolute', top: 'calc(100% + 8px)', right: 0,
               background: '#fff', border: '0.5px solid #e5e7eb',
               borderRadius: '10px', boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
               minWidth: '280px', maxHeight: '320px', overflowY: 'auto',
-              zIndex: 1000
+              zIndex: 99999
             }}>
-              <div style={{ padding: '12px 16px', borderBottom: '0.5px solid #f3f4f6', fontWeight: 500, fontSize: '14px', color: '#111' }}>
-                Njoftimet
+              <div style={{
+                padding: '12px 16px', borderBottom: '0.5px solid #f3f4f6',
+                fontWeight: 500, fontSize: '14px', color: '#111',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              }}>
+                <span>Njoftimet</span>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={() => setNotifications([])}
+                    style={{ fontSize: '12px', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    Pastro
+                  </button>
+                )}
               </div>
               {notifications.length === 0 ? (
                 <p style={{ padding: '20px 16px', color: '#6b7280', fontSize: '13px', textAlign: 'center' }}>
-                  Nuk ka njoftime akoma.
+                  Nuk ka njoftime.
                 </p>
               ) : (
                 notifications.map(n => (
@@ -121,19 +139,6 @@ function Navbar() {
         >
           Logout
         </button>
-      </div>
-
-      {/* Toasts */}
-      <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 1000 }}>
-        {toasts.map((t, i) => (
-          <div key={i} style={{
-            background: '#1f2937', color: '#fff',
-            padding: '10px 16px', borderRadius: '8px',
-            marginTop: '8px', fontSize: '14px'
-          }}>
-            🔔 {t}
-          </div>
-        ))}
       </div>
     </header>
   )
