@@ -1,22 +1,29 @@
 const { Op } = require('sequelize');
-const { Form, User, Question, Response, Section } = require('../models');
+const { Form, User, Question, Response } = require('../models');
+const { getUserRoles } = require('../repositories/roleRepository');
 
 const search = async (req, res) => {
   try {
-    const { q, type } = req.query;
-    if (!q) return res.status(400).json({ message: 'Query parameter q is required' });
+    let { q, type } = req.query;
+    if (!q || q === "*") q = "";
+
+    const userId = req.user.id;
+    const userRoles = await getUserRoles(userId);
+    const isAdmin = userRoles.some(r => r.name === 'admin');
 
     const results = {};
 
     if (!type || type === 'forms') {
+      const where = { title: { [Op.like]: `%${q}%` } };
+      if (!isAdmin) where.ownerId = userId;
       results.forms = await Form.findAll({
-        where: { title: { [Op.like]: `%${q}%` } },
+        where,
         attributes: ['id', 'title', 'description', 'createdAt'],
         limit: 10
       });
     }
 
-    if (!type || type === 'users') {
+    if ((!type || type === 'users') && isAdmin) {
       results.users = await User.findAll({
         where: {
           [Op.or]: [
@@ -31,23 +38,25 @@ const search = async (req, res) => {
     }
 
     if (!type || type === 'questions') {
+      const formWhere = isAdmin ? {} : { ownerId: userId };
+      const userForms = await Form.findAll({ where: formWhere, attributes: ['id'] });
+      const formIds = userForms.map(f => f.id);
       results.questions = await Question.findAll({
-        where: { label: { [Op.like]: `%${q}%` } },
+        where: {
+          label: { [Op.like]: `%${q}%` },
+          formId: { [Op.in]: formIds.length ? formIds : [0] }
+        },
         attributes: ['id', 'label', 'type', 'formId'],
         limit: 10
       });
     }
 
-    if (!type || type === 'sections') {
-      results.sections = await Section.findAll({
-        where: { title: { [Op.like]: `%${q}%` } },
-        attributes: ['id', 'title', 'formId'],
-        limit: 10
-      });
-    }
-
-    if (!type || type === 'responses') {
+    if (type === 'responses') {
+      const formWhere = isAdmin ? {} : { ownerId: userId };
+      const userForms = await Form.findAll({ where: formWhere, attributes: ['id'] });
+      const formIds = userForms.map(f => f.id);
       results.responses = await Response.findAll({
+        where: { formId: { [Op.in]: formIds.length ? formIds : [0] } },
         attributes: ['id', 'formId', 'createdAt'],
         limit: 10
       });

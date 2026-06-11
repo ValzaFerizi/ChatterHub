@@ -17,14 +17,12 @@ function Sidebar() {
         <NavLink to="/forms">Forms</NavLink>
         <NavLink to="/sheets">Sheets</NavLink>
         <NavLink to="/create-form">Create Form</NavLink>
-        <NavLink to="/search">Search</NavLink>
 
         {isAdmin && (
           <>
             <hr style={{ border: "none", borderTop: "1px solid #e5e7eb", margin: "8px 0" }} />
             <NavLink to="/users">Users</NavLink>
             <NavLink to="/audit">Audit Logs</NavLink>
-            <NavLink to="/responses">Responses</NavLink>
           </>
         )}
       </nav>
