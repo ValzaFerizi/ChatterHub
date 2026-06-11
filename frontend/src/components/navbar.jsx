@@ -1,12 +1,11 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState, useRef } from 'react'
-import { useSocket } from '../hooks/useSocket'
+import { io } from 'socket.io-client'
 
 function Navbar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const socketRef = useSocket()
   const [notifications, setNotifications] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
   const inputRef = useRef()
@@ -15,16 +14,23 @@ function Navbar() {
   const unread = notifications.filter(n => !n.read).length
 
   useEffect(() => {
-    const socket = socketRef.current
-    if (!socket) return
+    const token = localStorage.getItem('accessToken')
+    if (!token) return
+
+    const socket = io('http://localhost:5000', {
+      auth: { token },
+      reconnection: true
+    })
+
     socket.on('notification', ({ message, type }) => {
       setNotifications(prev => [
         { id: Date.now(), message, type, read: false, time: new Date() },
         ...prev
       ])
     })
-    return () => socket.off('notification')
-  }, [socketRef])
+
+    return () => socket.disconnect()
+  }, [])
 
   useEffect(() => {
     const handleClick = (e) => {
