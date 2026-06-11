@@ -25,6 +25,7 @@ const exportCSV = async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename=export.csv');
     res.status(200).send(csv);
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -41,6 +42,7 @@ const exportJSON = async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename=export.json');
     res.status(200).send(json);
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -60,6 +62,7 @@ const exportExcel = async (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename=export.xlsx');
     res.status(200).send(buffer);
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -75,9 +78,23 @@ const importCSV = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
     const results = await importFromCSV(req.file.path);
-    fs.unlinkSync(req.file.path); // Fshi file-in temp
-    res.status(200).json({ message: 'Import successful', data: results });
+    fs.unlinkSync(req.file.path);
+    const { Form } = require('../models');
+    const saved = await Promise.all(
+      results.map(row => {
+        if (!row.title) return null;
+        return Form.create({
+          title: row.title,
+          description: row.description || '',
+          ownerId: req.user.id,
+          is_published: false
+        }).catch(() => null);
+      })
+    );
+    const created = saved.filter(Boolean);
+    res.status(200).json({ message: `Import successful: ${created.length} forms imported`, data: created });
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -89,9 +106,23 @@ const importJSON = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
     const results = importFromJSON(req.file.path);
-    fs.unlinkSync(req.file.path); // Fshi file-in temp
-    res.status(200).json({ message: 'Import successful', data: results });
+    fs.unlinkSync(req.file.path);
+    const { Form } = require('../models');
+    const saved = await Promise.all(
+      results.map(row => {
+        if (!row.title) return null;
+        return Form.create({
+          title: row.title,
+          description: row.description || '',
+          ownerId: req.user.id,
+          is_published: false
+        }).catch(() => null);
+      })
+    );
+    const created = saved.filter(Boolean);
+    res.status(200).json({ message: `Import successful: ${created.length} forms imported`, data: created });
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -103,9 +134,23 @@ const importExcel = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
     const results = await importFromExcel(req.file.path);
-    fs.unlinkSync(req.file.path); // Fshi file-in temp
-    res.status(200).json({ message: 'Import successful', data: results });
+    fs.unlinkSync(req.file.path);
+    const { Form } = require('../models');
+    const saved = await Promise.all(
+      results.map(row => {
+        if (!row.title) return null;
+        return Form.create({
+          title: row.title,
+          description: row.description || '',
+          ownerId: req.user.id,
+          is_published: false
+        }).catch(() => null);
+      })
+    );
+    const created = saved.filter(Boolean);
+    res.status(200).json({ message: `Import successful: ${created.length} forms imported`, data: created });
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -1,4 +1,5 @@
 const express = require('express');
+const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -34,8 +35,8 @@ router.post('/excel', exportExcel);
 // ===========================
 // IMPORT ROUTES
 // ===========================
-router.post('/import/csv', upload.single('file'), importCSV);
-router.post('/import/json', upload.single('file'), importJSON);
-router.post('/import/excel', upload.single('file'), importExcel);
+router.post('/import/csv', verifyToken, upload.single('file'), importCSV);
+router.post('/import/json', verifyToken, upload.single('file'), importJSON);
+router.post('/import/excel', verifyToken, upload.single('file'), importExcel);
 
 module.exports = router;

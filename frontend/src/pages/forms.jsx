@@ -15,6 +15,7 @@ function Forms() {
   const [message, setMessage] = useState("");
   const [progress, setProgress] = useState(0);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [openImportDropdown, setOpenImportDropdown] = useState(false);
 
   useEffect(() => {
     api.get("/forms")
@@ -45,17 +46,18 @@ function Forms() {
     alert("Gabim gjatë fshirjes: " + (err.response?.data?.message || err.message));
   }
 };
-  const handleExport = async (format) => {
+  const handleExport = async (format, form) => {
     try {
       setLoading(true);
       setMessage("");
       setProgress(0);
       setOpenDropdown(null);
+      const singleForm = [{ id: form.id, title: form.title, description: form.description, createdAt: form.createdAt || form.created_at }];
       const response = await axios.post(
         `${API_URL}/export/${format}`,
         format === "csv"
-          ? { data: forms, fields: ["id", "title", "description", "createdAt"] }
-          : { data: forms },
+          ? { data: singleForm, fields: ["id", "title", "description", "createdAt"] }
+          : { data: singleForm },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
           responseType: "blob",
@@ -93,7 +95,57 @@ function Forms() {
           <h1>Forms</h1>
           <p>Create and manage your forms.</p>
         </div>
-        <Link className="primary-btn" to="/create-form">New Form</Link>
+        <div style={{position:'relative'}} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => setOpenImportDropdown(!openImportDropdown)}
+            style={{padding:'8px 16px',background:'#7c3aed',color:'#fff',border:'none',borderRadius:'6px',cursor:'pointer',fontSize:'14px'}}>
+            📥 Import ▼
+          </button>
+          {openImportDropdown && (
+            <div style={{position:'absolute',top:'calc(100% + 4px)',left:0,background:'white',border:'1px solid #e5e7eb',borderRadius:'8px',boxShadow:'0 4px 12px rgba(0,0,0,0.1)',zIndex:100,minWidth:'160px'}}>
+              <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 14px',cursor:'pointer',fontSize:'13px',color:'#111'}}>
+                📄 Import CSV
+                <input type="file" accept=".csv" style={{display:'none'}}
+                  onChange={async (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const formData = new FormData(); formData.append('file', file);
+                    setOpenImportDropdown(false);
+                    try {
+                      await axios.post('http://localhost:5000/api/export/import/csv', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${localStorage.getItem('accessToken')}` } });
+                      setMessage('✅ CSV imported!'); window.location.reload();
+                    } catch (err) { setMessage('❌ Import failed: ' + err.message); }
+                  }} />
+              </label>
+              <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 14px',cursor:'pointer',fontSize:'13px',color:'#111'}}>
+                📊 Import Excel
+                <input type="file" accept=".xlsx,.xls" style={{display:'none'}}
+                  onChange={async (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const formData = new FormData(); formData.append('file', file);
+                    setOpenImportDropdown(false);
+                    try {
+                      await axios.post('http://localhost:5000/api/export/import/excel', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${localStorage.getItem('accessToken')}` } });
+                      setMessage('✅ Excel imported!'); window.location.reload();
+                    } catch (err) { setMessage('❌ Import failed: ' + err.message); }
+                  }} />
+              </label>
+              <label style={{display:'flex',alignItems:'center',gap:'8px',padding:'9px 14px',cursor:'pointer',fontSize:'13px',color:'#111'}}>
+                📋 Import JSON
+                <input type="file" accept=".json" style={{display:'none'}}
+                  onChange={async (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const formData = new FormData(); formData.append('file', file);
+                    setOpenImportDropdown(false);
+                    try {
+                      await axios.post('http://localhost:5000/api/export/import/json', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${localStorage.getItem('accessToken')}` } });
+                      setMessage('✅ JSON imported!'); window.location.reload();
+                    } catch (err) { setMessage('❌ Import failed: ' + err.message); }
+                  }} />
+              </label>
+            </div>
+          )}
+          <Link className="primary-btn" to="/create-form" style={{marginLeft:'12px'}}>New Form</Link>
+        </div>
       </div>
 
       <ExportProgress loading={loading} message={message} progress={progress} />
@@ -130,13 +182,13 @@ function Forms() {
                   </button>
                   {openDropdown === form.id && (
                     <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, background: "white", border: "0.5px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 100, minWidth: "150px" }}>
-                      <button onClick={() => handleExport("csv")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                      <button onClick={() => handleExport("csv", form)} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📄 Export CSV
                       </button>
-                      <button onClick={() => handleExport("excel")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                      <button onClick={() => handleExport("excel", form)} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📊 Export Excel
                       </button>
-                      <button onClick={() => handleExport("json")} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
+                      <button onClick={() => handleExport("json", form)} style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}>
                         📋 Export JSON
                       </button>
                     </div>
