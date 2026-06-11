@@ -19,6 +19,7 @@ const sectionRoutes      = require('./routes/section.routes');
 const questionRoutes     = require('./routes/question.routes');
 const responseRoutes     = require('./routes/response.routes');
 const searchRoutes       = require('./routes/searchRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
 
 const app    = express();
 const server = http.createServer(app);
@@ -42,6 +43,7 @@ app.use('/api/forms',       formRoutes);
 app.use('/api/sections',    sectionRoutes);
 app.use('/api/questions',   questionRoutes);
 app.use('/api/responses',   responseRoutes);
+app.use('/api/settings', settingsRoutes);
 
 const io = initSocket(server);
 app.set('io', io);
@@ -50,6 +52,26 @@ connectMongo();
 const { sequelize } = require('./models');
 sequelize.sync({ alter: true })
   .then(() => console.log('✅ Tabelat u krijuan'))
+  .catch(err => console.warn('⚠️ DB:', err.message));
+
+const { Settings } = require('./models');
+const seedSettings = async () => {
+  const defaultSettings = [
+    { key: 'app_name', value: 'Formify', description: 'Emri i aplikacionit' },
+    { key: 'app_tagline', value: 'Forms + Sheets', description: 'Tagline i aplikacionit' },
+    { key: 'welcome_message', value: 'Kycu në llogarinë tënde', description: 'Mesazhi i login' },
+    { key: 'primary_color', value: '#6d28d9', description: 'Ngjyra kryesore' },
+  ];
+  for (const s of defaultSettings) {
+    await Settings.findOrCreate({ where: { key: s.key }, defaults: s });
+  }
+};
+
+sequelize.sync({ alter: true })
+  .then(() => {
+    console.log('✅ Tabelat u krijuan');
+    return seedSettings();
+  })
   .catch(err => console.warn('⚠️ DB:', err.message));
 
 const PORT = process.env.PORT || 5000;
