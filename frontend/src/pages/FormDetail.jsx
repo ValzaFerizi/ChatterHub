@@ -197,6 +197,18 @@ function FormDetail() {
                       onChange={(e) => handleAnswer(q.id, e.target.value)}
                       style={{ padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', fontSize: '14px' }} />
                   )}
+
+                  {q.type === "file_upload" && (
+                    <input type="file"
+                      onChange={(e) => handleAnswer(q.id, e.target.files[0]?.name || "")}
+                      style={{ padding: "8px 0", fontSize: "14px" }} />
+                  )}
+
+                  {q.type === "photo_upload" && (
+                    <input type="file" accept="image/*"
+                      onChange={(e) => handleAnswer(q.id, e.target.files[0]?.name || "")}
+                      style={{ padding: "8px 0", fontSize: "14px" }} />
+                  )}
                 </div>
               ))
             )}

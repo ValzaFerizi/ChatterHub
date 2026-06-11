@@ -12,7 +12,8 @@ const FormController = {
       }
       return res.status(201).json({ message: 'Form created successfully', data: form });
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to create form', error: error.message });
+      console.error("CREATE FORM ERROR:", error);
+      return res.status(500).json({ message: "Failed to create form", error: error.message });
     }
   },
 
