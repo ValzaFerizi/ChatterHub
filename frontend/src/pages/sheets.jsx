@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/api";
 import axios from "axios";
 import { useSocket } from "../hooks/useSocket";
+import ExportProgress from "../components/ExportProgress";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -11,7 +12,9 @@ function Sheets() {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(false);
+  const [exportMessage, setExportMessage] = useState("");
+  const [exportProgress, setExportProgress] = useState(0);
+  const [openDropdown, setOpenDropdown] = useState(null);
   const socketRef = useSocket();
 
   useEffect(() => {
@@ -44,12 +47,6 @@ function Sheets() {
     return () => socket.emit("sheet:leave", { sheetId: selectedForm.id });
   }, [socketRef, selectedForm]);
 
-  useEffect(() => {
-    const handleClick = () => setOpenDropdown(false);
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
   const getColumns = () => {
     if (!responses?.length) return [];
     const allKeys = new Set();
@@ -71,18 +68,19 @@ function Sheets() {
   };
 
   const handleExport = async (format) => {
-    if (!selectedForm || responses.length === 0) return;
     setExportLoading(true);
-    setOpenDropdown(false);
+    setExportMessage("");
+    setExportProgress(0);
+    setOpenDropdown(null);
     try {
-      const columns = getColumns();
+      const cols = getColumns();
       const reportData = responses.map((r, i) => {
         const row = {
           "#": i + 1,
           Forma: selectedForm.title,
           Data: new Date(r.submittedAt || r.created_at).toLocaleString(),
         };
-        columns.forEach(col => { row[col] = getAnswer(r, col); });
+        cols.forEach(col => { row[col] = getAnswer(r, col); });
         return row;
       });
       const fields = Object.keys(reportData[0] || {});
@@ -94,7 +92,11 @@ function Sheets() {
       const response = await axios.post(
         endpoint,
         format === "csv" ? { data: reportData, fields } : { data: reportData, sheetName: selectedForm.title },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` }, responseType: "blob" }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+          responseType: "blob",
+          onDownloadProgress: (e) => { setExportProgress(Math.round((e.loaded * 100) / (e.total || 1))); }
+        }
       );
       const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -103,8 +105,10 @@ function Sheets() {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      setExportProgress(100);
+      setExportMessage(`✅ Raporti u eksportua si ${format.toUpperCase()}!`);
     } catch (err) {
-      alert(`Export dështoi: ${err.message}`);
+      setExportMessage(`❌ Export dështoi: ${err.message}`);
     } finally {
       setExportLoading(false);
     }
@@ -113,25 +117,25 @@ function Sheets() {
   const columns = getColumns();
 
   return (
-    <div onClick={() => setOpenDropdown(false)}>
+    <div onClick={() => setOpenDropdown(null)}>
       <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <h1>Sheets</h1>
           <p>Përgjigjet e formave në kohë reale.</p>
         </div>
-        {selectedForm && responses.length > 0 && (
+        {selectedForm && (
           <div style={{ position: "relative" }} onClick={e => e.stopPropagation()}>
             <button
-              onClick={() => setOpenDropdown(prev => !prev)}
+              onClick={() => setOpenDropdown(openDropdown === "export" ? null : "export")}
               disabled={exportLoading}
               style={{ padding: "8px 16px", background: "#6d28d9", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 500 }}
             >
               {exportLoading ? "Duke eksportuar..." : "⬇ Export Raport"}
             </button>
-            {openDropdown && (
-              <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, background: "#fff", border: "0.5px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 100, minWidth: "180px" }}>
+            {openDropdown === "export" && (
+              <div style={{ position: "absolute", top: "calc(100% + 4px)", right: 0, background: "white", border: "0.5px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 100, minWidth: "180px" }}>
                 <div style={{ padding: "8px 12px", fontSize: "11px", color: "#9ca3af", fontWeight: 500, borderBottom: "0.5px solid #f3f4f6" }}>
-                  Raport për: {selectedForm.title}
+                  Raport: {selectedForm.title}
                 </div>
                 {[
                   { format: "csv", label: "📄 Export CSV" },
@@ -141,9 +145,7 @@ function Sheets() {
                   <button
                     key={format}
                     onClick={() => handleExport(format)}
-                    style={{ display: "block", width: "100%", padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111", textAlign: "left", borderBottom: "0.5px solid #f9fafb" }}
-                    onMouseEnter={e => (e.target.style.background = "#f9fafb")}
-                    onMouseLeave={e => (e.target.style.background = "none")}
+                    style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", padding: "9px 14px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#111" }}
                   >
                     {label}
                   </button>
@@ -153,6 +155,8 @@ function Sheets() {
           </div>
         )}
       </div>
+
+      <ExportProgress loading={exportLoading} message={exportMessage} progress={exportProgress} />
 
       {!loading && forms.length > 0 && (
         <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
